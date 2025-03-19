@@ -33,15 +33,15 @@ export class TokenStorage {
   }
 
   public static setIsLoggedIn(isRememberMe: boolean = false) {
-    if (isRememberMe == true) {
-      return localStorage.setItem(this.ISLOGGEDIN, 'true');
+    localStorage.setItem(this.ISLOGGEDIN, 'true');
+    if (isRememberMe == false) {
+      sessionStorage.setItem(this.ISLOGGEDIN, 'true');
     }
-    return sessionStorage.setItem(this.ISLOGGEDIN, 'true');
   }
   public static getIsLoggedIn() {
     if (
-      sessionStorage.getItem(this.ISLOGGEDIN) ||
-      localStorage.getItem(this.ISLOGGEDIN)
+      sessionStorage.getItem(this.ISLOGGEDIN) == 'true' ||
+      localStorage.getItem(this.ISLOGGEDIN) == 'true'
     ) {
       return true;
     }
