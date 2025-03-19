@@ -191,8 +191,8 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
     this.switchLanguage(this.getLanguages);
   }
   ngOnInit(): void {
-    this.startAutoSlide();
-    if (TokenStorage.checkLoggedIn()) {
+    // this.startAutoSlide();
+    if (TokenStorage.getIsReme()) {
       this.router.navigateByUrl('quan-ly-nhan-vien');
     }
   }
@@ -202,33 +202,28 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
       clearInterval(this.intervalId);
     }
   }
-  checkLoggedIn() {
-    const isLoggedIn = TokenStorage.getIsLoggedIn();
-    console.log('isLoggedIn');
-    console.log(isLoggedIn);
+  // checkLoggedIn() {
+  //   const isLoggedIn = TokenStorage.getIsLoggedIn();
+  //   console.log('isLoggedIn');
+  //   console.log(isLoggedIn);
 
-    if (isLoggedIn) {
-      this.router.navigateByUrl('quan-ly-nhan-vien');
-    }
-  }
+  //   if (isLoggedIn) {
+  //     this.router.navigateByUrl('quan-ly-nhan-vien');
+  //   }
+  // }
 
   async login() {
-    if (
-      await this.authService.signIn(
-        this.userName,
-        this.passWord,
-        this.isRememberMe,
-        ''
-      )
-    ) {
-      this.router.navigateByUrl('quan-ly-nhan-vien');
-    }
+    await this.authService.signIn(
+      this.userName,
+      this.passWord,
+      this.isRememberMe
+    );
   }
 
   selectLanguage(lang: string) {
     console.log(lang);
     this.switchLanguage(lang);
-    AppGlobals.setLang(lang);
+    AppGlobals.setLang(lang); // Lưu vào localStorage
   }
 
   switchLanguage(lang: string) {

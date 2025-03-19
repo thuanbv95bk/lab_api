@@ -18,9 +18,7 @@ export class AuthService {
   async signIn(
     username: string,
     password: string,
-    isRememberMe: boolean = false,
-    returnUrl: string = '',
-    noRedirect = false
+    isRememberMe: boolean = false
   ) {
     try {
       const use = new UserInfo();
@@ -31,19 +29,17 @@ export class AuthService {
       if (use.userName == 'admin' && use.passWord == 'admin@123') {
         if (use.isRememberMe == true) {
           TokenStorage.setIsLoggedIn(true);
-          TokenStorage.saveToken(use);
+          TokenStorage.setIsReme(true);
+          // TokenStorage.saveToken(use);
         } else {
           TokenStorage.clearToken();
+          TokenStorage.setIsReme(false);
           TokenStorage.setIsLoggedIn(); // Chỉ lưu trạng thái trong session
         }
         this.router.navigateByUrl('quan-ly-nhan-vien');
         this.commonService.showSuccess('Đăng nhập thành công');
       } else {
         alert('Tài khoản hoặc và mật khẩu không đúng.');
-      }
-
-      if (!noRedirect) {
-        this.router.navigateByUrl(returnUrl);
       }
     } catch (err) {
       console.log(err);
@@ -60,10 +56,12 @@ export class AuthService {
   }
 
   checkLoggedIn() {
-    const isLoggedIn = TokenStorage.getIsLoggedIn();
-    if (isLoggedIn) {
+    // const isLoggedIn = TokenStorage.getIsLoggedIn();
+    const IsReme = TokenStorage.getIsReme();
+    if (IsReme == true) {
       return this.router.navigateByUrl('quan-ly-nhan-vien');
+    } else {
+      return this.router.navigateByUrl('login');
     }
-    return this.router.navigateByUrl('login');
   }
 }

@@ -5,7 +5,7 @@ export class TokenStorage {
   public static readonly USER_NAME = 'username';
   public static readonly PASS_WORD = 'password';
   public static readonly ISLOGGEDIN = 'loggedIn';
-
+  public static readonly ISREME = 'isreme';
   public static saveToken(user: UserInfo) {
     localStorage.setItem(this.JWT_TOKEN, JSON.stringify(user));
   }
@@ -13,7 +13,21 @@ export class TokenStorage {
   public static getToken() {
     return localStorage.getItem(this.JWT_TOKEN);
   }
-
+  public static setIsReme(isRememberMe: boolean) {
+    if (isRememberMe == true) {
+      localStorage.setItem(this.ISREME, 'true');
+    } else {
+      localStorage.setItem(this.ISREME, 'false');
+    }
+  }
+  public static getIsReme() {
+    const IsReme = localStorage.getItem(this.ISREME);
+    if (IsReme == 'true') {
+      return true;
+    } else {
+      return false;
+    }
+  }
   public static isLoggedIn() {
     return localStorage.getItem(this.JWT_TOKEN) != null;
   }
@@ -38,6 +52,7 @@ export class TokenStorage {
     localStorage.removeItem(this.JWT_TOKEN);
     localStorage.removeItem(this.ISLOGGEDIN);
     sessionStorage.removeItem(this.ISLOGGEDIN);
+    localStorage.removeItem(this.ISREME);
   }
   public static checkLoggedIn() {
     return TokenStorage.getIsLoggedIn();
