@@ -4,7 +4,6 @@ import { CommonService } from '../service/common.service';
 import { AppGlobals } from '../common/app-global';
 import { AuthService } from '../common/auth/auth.service';
 import { Branch, Languages, Menu, News } from '../model/app-model';
-import { TokenStorage } from '../common/auth/token.storage';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-layout',
@@ -184,24 +183,19 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
     this.getLanguages = AppGlobals.getLang();
     this.switchLanguage(this.getLanguages);
   }
+
   ngOnInit(): void {
+    // Kiểm tra trạng thai đăng nhập
+    this.authService.checkLoggedIn();
     this.startAutoSlide();
-    if (TokenStorage.getIsLoggedIn()) {
-      this.router.navigateByUrl('quan-ly-nhan-vien');
-    }
   }
 
   ngOnDestroy() {
     this.stopAutoSlide();
   }
 
-  async login() {
-    await this.authService.signIn(
-      this.userName,
-      this.passWord,
-      this.isRememberMe,
-      ''
-    );
+  login() {
+    this.authService.signIn(this.userName, this.passWord, this.isRememberMe);
   }
 
   selectLanguage(lang: string) {
@@ -220,12 +214,15 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
   }
 
   //#region  Funtion Slide
+
+  // Bật chạy Slide
   startAutoSlide() {
     this.intervalId = setInterval(() => {
       this.nextSlide();
     }, this.intervalSlide);
   }
 
+  // Dừng Slide
   stopAutoSlide() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
