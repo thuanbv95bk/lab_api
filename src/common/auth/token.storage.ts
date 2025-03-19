@@ -6,12 +6,18 @@ export class TokenStorage {
   public static readonly PASS_WORD = 'password';
   public static readonly ISLOGGEDIN = 'loggedIn';
   public static readonly ISREME = 'isreme';
-  public static saveToken(user: UserInfo) {
-    localStorage.setItem(this.JWT_TOKEN, JSON.stringify(user));
+
+  public static saveToken(userName: string, passWord: string) {
+    localStorage.setItem(this.USER_NAME, userName);
+    localStorage.setItem(this.PASS_WORD, passWord);
   }
 
   public static getToken() {
-    return localStorage.getItem(this.JWT_TOKEN);
+    const _token = new UserInfo();
+    _token.userName = localStorage.getItem(this.USER_NAME);
+    _token.passWord = localStorage.getItem(this.PASS_WORD);
+
+    return _token;
   }
   public static setIsReme(isRememberMe: boolean) {
     if (isRememberMe == true) {
@@ -33,9 +39,12 @@ export class TokenStorage {
   }
 
   public static setIsLoggedIn(isRememberMe: boolean = false) {
-    localStorage.setItem(this.ISLOGGEDIN, 'true');
     if (isRememberMe == false) {
       sessionStorage.setItem(this.ISLOGGEDIN, 'true');
+      localStorage.removeItem(this.ISLOGGEDIN);
+    } else {
+      localStorage.setItem(this.ISLOGGEDIN, 'true');
+      sessionStorage.removeItem(this.ISLOGGEDIN);
     }
   }
   public static getIsLoggedIn() {
@@ -51,10 +60,29 @@ export class TokenStorage {
   public static clearToken() {
     localStorage.removeItem(this.JWT_TOKEN);
     localStorage.removeItem(this.ISLOGGEDIN);
-    sessionStorage.removeItem(this.ISLOGGEDIN);
     localStorage.removeItem(this.ISREME);
+    localStorage.removeItem(this.USER_NAME);
+    localStorage.removeItem(this.PASS_WORD);
+    sessionStorage.removeItem(this.ISLOGGEDIN);
   }
+
   public static checkLoggedIn() {
-    return TokenStorage.getIsLoggedIn();
+    const isReme = TokenStorage.getIsReme();
+    const isLoggedIn = TokenStorage.getIsLoggedIn();
+    const userInfor = TokenStorage.getToken();
+    console.log('checkLoggedIn');
+    console.log(isReme);
+    console.log(isLoggedIn);
+
+    if (isReme == true || isLoggedIn == true) {
+      return 'quan-ly-nhan-vien';
+    }
+    if (userInfor.userName == 'admin' && userInfor.passWord == 'admin@123') {
+      return 'quan-ly-nhan-vien';
+    }
+    if (isReme == false || isLoggedIn == false) {
+      return 'login';
+    }
+    return '';
   }
 }
