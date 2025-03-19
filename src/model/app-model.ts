@@ -53,8 +53,8 @@ export class Languages {
   }
 }
 export class UserInfo {
-  userName: string;
-  passWord: string;
+  userName: string | null;
+  passWord: string | null;
   isRememberMe: boolean;
 
   constructor(obj?: Partial<UserInfo>) {
