@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AppGlobals } from '../common/app-global';
 import { TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../common/auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -10,9 +11,11 @@ import { TranslateService } from '@ngx-translate/core';
 export class AppComponent implements OnInit, OnDestroy {
   title = 'FromLogin';
   defaultLang: string = 'vi';
-  constructor(public translate: TranslateService) {}
+  constructor(
+    public translate: TranslateService,
+    private authService: AuthService
+  ) {}
   ngOnInit(): void {
-    // localStorage.removeItem('language');
     this.initTranslate();
   }
 

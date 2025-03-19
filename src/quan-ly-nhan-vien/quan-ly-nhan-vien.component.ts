@@ -9,13 +9,12 @@ import { AuthService } from '../common/auth/auth.service';
 })
 export class QuanLyNhanVienComponent implements OnInit {
   constructor(public myRoute: Router, private authService: AuthService) {}
+
   ngOnInit(): void {
-    // this.authService.checkLoggedIn();
+    this.authService.checkLoggedIn();
   }
 
-  goback() {
-    this.myRoute.navigateByUrl('');
-  }
+  // Đăng xuất
   signOut() {
     this.authService.signOut();
   }

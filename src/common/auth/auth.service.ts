@@ -13,17 +13,29 @@ export class AuthService {
     public commonService: CommonService,
     protected httpClient: HttpClient,
     private router: Router
-  ) {}
+  ) {
+    this.listenLogout();
+  }
 
-  goPageHome() {
+  // tạo sự kiện ĐĂNG XUẤT
+  private listenLogout() {
+    window.addEventListener('storage', (event) => {
+      if (event.key == TokenStorage.HANDELOGOUT) {
+        sessionStorage.removeItem(TokenStorage.ISLOGGEDIN);
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+
+  private goPageHome() {
     this.router.navigateByUrl('quan-ly-nhan-vien');
   }
 
+  // Đăng nhập
   async signIn(
     userName: string,
     passWord: string,
-    isRememberMe: boolean = false,
-    dieuHuongUrl: string
+    isRememberMe: boolean = false
   ) {
     try {
       const use = new UserInfo();
@@ -32,53 +44,52 @@ export class AuthService {
       use.isRememberMe = isRememberMe;
 
       if (use.userName == 'admin' && use.passWord == 'admin@123') {
-        TokenStorage.setIsLoggedIn(use.isRememberMe);
-
-        if (use.isRememberMe == true) {
-          TokenStorage.setIsReme(true);
-          TokenStorage.saveToken(use.userName, use.passWord);
-        } else {
-          TokenStorage.clearToken();
-          TokenStorage.setIsReme(false);
+        if (isRememberMe == true) {
+          localStorage.setItem(TokenStorage.ISLOGGEDIN, 'true');
+          localStorage.setItem(TokenStorage.ISREMBERME, 'true');
         }
-
+        sessionStorage.setItem(TokenStorage.ISLOGGEDIN, 'true');
+        localStorage.setItem(TokenStorage.HANDELOGIN, Date.now().toString());
+        localStorage.removeItem(TokenStorage.HANDELOGOUT);
         this.goPageHome();
         this.commonService.showSuccess('Đăng nhập thành công');
       } else {
-        alert('Tài khoản hoặc và mật khẩu không đúng.');
+        this.commonService.showError('Tài khoản hoặc và mật khẩu không đúng.');
       }
     } catch (err) {
       alert(err);
       return false;
     }
-
     return true;
   }
 
+  //Đăng xuất
   signOut() {
     TokenStorage.clearToken();
-    this.router.navigate(['/login']);
+    // Gửi tín hiệu logout cho các tab khác
+    localStorage.setItem(TokenStorage.HANDELOGOUT, Date.now().toString());
+    this.router.navigateByUrl('login');
   }
 
   checkLoggedIn() {
-    const isReme = TokenStorage.getIsReme();
-    const isLoggedIn = TokenStorage.getIsLoggedIn();
-    const userInfor = TokenStorage.getToken();
-    console.log('checkLoggedIn');
-    console.log(isReme);
-    console.log(isLoggedIn);
+    //Khôi phục session từ localStorage
+    if (localStorage.getItem(TokenStorage.ISLOGGEDIN)) {
+      sessionStorage.setItem(TokenStorage.ISLOGGEDIN, 'true');
+    }
 
-    if (isReme == true) {
+    if (sessionStorage.getItem(TokenStorage.ISLOGGEDIN)) {
       this.goPageHome();
       return;
     }
-    if (userInfor.userName == 'admin' && userInfor.passWord == 'admin@123') {
-      this.goPageHome();
-      return;
+    // Nếu localStorage có handelLogin từ tab khác, khôi phục sessionStorage
+    if (localStorage.getItem(TokenStorage.HANDELOGIN)) {
+      sessionStorage.setItem(TokenStorage.ISLOGGEDIN, 'true');
     }
-    if (isReme == false || isLoggedIn == false) {
+
+    if (sessionStorage.getItem(TokenStorage.ISLOGGEDIN) == 'true') {
+      this.goPageHome();
+    } else {
       this.router.navigateByUrl('login');
-      return;
     }
   }
 }
