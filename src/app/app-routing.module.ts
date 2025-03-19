@@ -9,7 +9,7 @@ const routes: Routes = [
   {
     path: '',
     redirectTo:
-      TokenStorage.getIsLoggedIn() == true ? 'quan-ly-nhan-vien' : 'login',
+      TokenStorage.getIsReme() == true ? 'quan-ly-nhan-vien' : 'login',
     pathMatch: 'full',
   },
   { path: 'login', component: LayoutGridComponent },
