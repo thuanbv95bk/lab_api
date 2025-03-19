@@ -9,12 +9,11 @@ const routes: Routes = [
   {
     path: '',
     redirectTo:
-      TokenStorage.getIsReme() == true ? 'quan-ly-nhan-vien' : 'login',
+      TokenStorage.getIsLoggedIn() == true ? 'quan-ly-nhan-vien' : 'login',
     pathMatch: 'full',
   },
   { path: 'login', component: LayoutGridComponent },
   { path: 'quan-ly-nhan-vien', component: QuanLyNhanVienComponent },
-  // { path: '', redirectTo: 'login', pathMatch: 'full' },
 ];
 
 @NgModule({

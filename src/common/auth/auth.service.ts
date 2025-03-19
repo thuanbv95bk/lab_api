@@ -15,35 +15,40 @@ export class AuthService {
     private router: Router
   ) {}
 
+  goPageHome() {
+    this.router.navigateByUrl('quan-ly-nhan-vien');
+  }
+
   async signIn(
-    username: string,
-    password: string,
-    isRememberMe: boolean = false
+    userName: string,
+    passWord: string,
+    isRememberMe: boolean = false,
+    dieuHuongUrl: string
   ) {
     try {
       const use = new UserInfo();
-      use.userName = username;
-      use.passWord = password;
+      use.userName = userName;
+      use.passWord = passWord;
       use.isRememberMe = isRememberMe;
 
       if (use.userName == 'admin' && use.passWord == 'admin@123') {
+        TokenStorage.setIsLoggedIn(use.isRememberMe);
+
         if (use.isRememberMe == true) {
-          TokenStorage.setIsLoggedIn(true);
           TokenStorage.setIsReme(true);
-          // TokenStorage.saveToken(use);
+          TokenStorage.saveToken(use.userName, use.passWord);
         } else {
           TokenStorage.clearToken();
           TokenStorage.setIsReme(false);
-          TokenStorage.setIsLoggedIn(); // Chỉ lưu trạng thái trong session
         }
-        this.router.navigateByUrl('quan-ly-nhan-vien');
+
+        this.goPageHome();
         this.commonService.showSuccess('Đăng nhập thành công');
       } else {
         alert('Tài khoản hoặc và mật khẩu không đúng.');
       }
     } catch (err) {
-      console.log(err);
-      alert('Có lỗi hệ thống!');
+      alert(err);
       return false;
     }
 
@@ -56,11 +61,24 @@ export class AuthService {
   }
 
   checkLoggedIn() {
-    const IsReme = TokenStorage.getIsReme();
-    if (IsReme == true) {
-      return this.router.navigateByUrl('quan-ly-nhan-vien');
-    } else {
-      return this.router.navigateByUrl('login');
+    const isReme = TokenStorage.getIsReme();
+    const isLoggedIn = TokenStorage.getIsLoggedIn();
+    const userInfor = TokenStorage.getToken();
+    console.log('checkLoggedIn');
+    console.log(isReme);
+    console.log(isLoggedIn);
+
+    if (isReme == true) {
+      this.goPageHome();
+      return;
+    }
+    if (userInfor.userName == 'admin' && userInfor.passWord == 'admin@123') {
+      this.goPageHome();
+      return;
+    }
+    if (isReme == false || isLoggedIn == false) {
+      this.router.navigateByUrl('login');
+      return;
     }
   }
 }

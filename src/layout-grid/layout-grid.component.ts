@@ -4,8 +4,8 @@ import { CommonService } from '../service/common.service';
 import { AppGlobals } from '../common/app-global';
 import { AuthService } from '../common/auth/auth.service';
 import { Branch, Languages, Menu, News } from '../model/app-model';
-import { Router } from '@angular/router';
 import { TokenStorage } from '../common/auth/token.storage';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-layout',
   templateUrl: './layout-grid.component.html',
@@ -166,54 +166,41 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
   //#region Khởi tạo biến
   userName: string = '';
   passWord: string = '';
-  typePasswordInput: string = 'password';
-  isMenuOpen = false;
   isRememberMe: boolean = false;
-
   getLanguages: string;
   selectedLang: Languages = new Languages();
-
   currentIndex: number = 0;
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   intervalId: any;
-  returnUrl: string = '';
-  IntervalSlide: number = 5000; // 5s
+  intervalSlide: number = 5000; // 5s
   //#endregion
 
   constructor(
-    private router: Router,
     public commonService: CommonService,
     public translate: TranslateService,
-    private authService: AuthService
+    private authService: AuthService,
+    public router: Router
   ) {
     this.getLanguages = AppGlobals.getLang();
     this.switchLanguage(this.getLanguages);
   }
   ngOnInit(): void {
     this.startAutoSlide();
-    this.checkLoggedIn();
+    if (TokenStorage.getIsLoggedIn()) {
+      this.router.navigateByUrl('quan-ly-nhan-vien');
+    }
   }
 
   ngOnDestroy() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
-  }
-  checkLoggedIn() {
-    const IsReme = TokenStorage.getIsReme();
-    const isLoggedIn = TokenStorage.getIsLoggedIn();
-
-    if ((IsReme == false && isLoggedIn == true) || IsReme == true) {
-      this.router.navigateByUrl('quan-ly-nhan-vien');
-    }
+    this.stopAutoSlide();
   }
 
   async login() {
     await this.authService.signIn(
       this.userName,
       this.passWord,
-      this.isRememberMe
+      this.isRememberMe,
+      ''
     );
   }
 
@@ -236,11 +223,13 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
   startAutoSlide() {
     this.intervalId = setInterval(() => {
       this.nextSlide();
-    }, this.IntervalSlide);
+    }, this.intervalSlide);
   }
 
   stopAutoSlide() {
-    clearInterval(this.intervalId);
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
   }
 
   updateSlide(index: number) {
