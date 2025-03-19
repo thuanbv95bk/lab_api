@@ -203,8 +203,6 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
   checkLoggedIn() {
     const IsReme = TokenStorage.getIsReme();
     const isLoggedIn = TokenStorage.getIsLoggedIn();
-    // console.log('isLoggedIn');
-    // console.log(isLoggedIn);
 
     if ((IsReme == false && isLoggedIn == true) || IsReme == true) {
       this.router.navigateByUrl('quan-ly-nhan-vien');
@@ -220,7 +218,6 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
   }
 
   selectLanguage(lang: string) {
-    console.log(lang);
     this.switchLanguage(lang);
     AppGlobals.setLang(lang); // Lưu vào localStorage
   }

@@ -56,7 +56,6 @@ export class AuthService {
   }
 
   checkLoggedIn() {
-    // const isLoggedIn = TokenStorage.getIsLoggedIn();
     const IsReme = TokenStorage.getIsReme();
     if (IsReme == true) {
       return this.router.navigateByUrl('quan-ly-nhan-vien');
