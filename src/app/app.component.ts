@@ -21,6 +21,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {}
 
+  /**
+   * Inits translate init ngôn ngữ để load về giao diện khi bật application
+   * @returns
+   */
   initTranslate() {
     const savedLang = AppGlobals.getLang().toString();
 

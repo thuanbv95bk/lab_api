@@ -12,6 +12,11 @@ import { Router } from '@angular/router';
 })
 export class LayoutGridComponent implements OnInit, OnDestroy {
   //#region Khởi tạo dữ liệu MasterData
+
+  /**
+   * List menu of layout grid component
+   * @class Menu danh sách menu hiển thị
+   */
   listMenu: Menu[] = [
     {
       href: 'https://bagps.vn/',
@@ -42,6 +47,11 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
       code: 'menuAboutUs',
     },
   ];
+
+  /**
+   * List new of layout grid component
+   * @class Danh sách các trang tin tức, và link của tin
+   */
   listNew: News[] = [
     {
       index: 0,
@@ -86,6 +96,10 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
     },
   ];
 
+  /**
+   * Listbranch  of layout grid component
+   * @class danh sách của các chi nhanh hiện ở footer
+   */
   Listbranch: Branch[] = [
     {
       index: 0,
@@ -93,7 +107,7 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
       address: [
         {
           index: 0,
-          Add: 'Lô 14 Nguyễn Cảnh Dị, P. Đại Kim, Q. Hoàng Mai, TP. Hà Nội.',
+          add: 'Lô 14 Nguyễn Cảnh Dị, P. Đại Kim, Q. Hoàng Mai, TP. Hà Nội.',
         },
       ],
     },
@@ -104,7 +118,7 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
       address: [
         {
           index: 0,
-          Add: 'Căn BH 01-47, KĐT Vinhomes Imperia, Đ. Bạch Đằng, P. Thượng Lý, Q. Hồng Bàng, TP. Hải Phòng.',
+          add: 'Căn BH 01-47, KĐT Vinhomes Imperia, Đ. Bạch Đằng, P. Thượng Lý, Q. Hồng Bàng, TP. Hải Phòng.',
         },
       ],
     },
@@ -114,11 +128,11 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
       address: [
         {
           index: 0,
-          Add: 'Số B5-15, ngõ 26, Đ. Nguyễn Thái Học, TP. Vinh, Nghệ An.',
+          add: 'Số B5-15, ngõ 26, Đ. Nguyễn Thái Học, TP. Vinh, Nghệ An.',
         },
         {
           index: 1,
-          Add: 'Số 402, Đ. Trần Phú, X. Thạch Trung, TP. Hà Tĩnh, Hà Tĩnh.',
+          add: 'Số 402, Đ. Trần Phú, X. Thạch Trung, TP. Hà Tĩnh, Hà Tĩnh.',
         },
       ],
     },
@@ -128,7 +142,7 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
       address: [
         {
           index: 0,
-          Add: 'Lô 1 Khu B2-19, KĐT Biệt thự sinh thái, Công Viên Văn Hóa Làng Quê, P. Hòa Quý, Ngũ Hành Sơn, TP. Đà Nẵng.',
+          add: 'Lô 1 Khu B2-19, KĐT Biệt thự sinh thái, Công Viên Văn Hóa Làng Quê, P. Hòa Quý, Ngũ Hành Sơn, TP. Đà Nẵng.',
         },
       ],
     },
@@ -139,7 +153,7 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
       address: [
         {
           index: 0,
-          Add: 'Số 9, Đường 37, KĐT Vạn Phúc, P. Hiệp Bình Phước, TP. Thủ Đức, TP. Hồ Chí Minh.',
+          add: 'Số 9, Đường 37, KĐT Vạn Phúc, P. Hiệp Bình Phước, TP. Thủ Đức, TP. Hồ Chí Minh.',
         },
       ],
     },
@@ -149,12 +163,16 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
       address: [
         {
           index: 0,
-          Add: 'Công ty TNHH Định Vị Số, Địa chỉ: Số 158 Đ. Tân Lập, TP. Thái Nguyên, Thái Nguyên.',
+          add: 'Công ty TNHH Định Vị Số, Địa chỉ: Số 158 Đ. Tân Lập, TP. Thái Nguyên, Thái Nguyên.',
         },
       ],
     },
   ];
 
+  /**
+   * List languages of layout grid component
+   * Danh sách ngôn ngữ hiển thị: để 2 ngôn ngữ
+   */
   listLanguages: Languages[] = [
     { code: 'vi', name: 'Tiếng Việt', flag: 'https://flagcdn.com/w40/vn.png' },
     { code: 'en', name: 'English', flag: 'https://flagcdn.com/w40/gb.png' },
@@ -168,9 +186,18 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
   isRememberMe: boolean = false;
   getLanguages: string;
   selectedLang: Languages = new Languages();
-  currentIndex: number = 0;
+  /**
+   * Current slide of layout grid component
+   * thứ tự của slide hiện tại
+   */
+  currentSlide: number = 0;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   intervalId: any;
+
+  /**
+   * Interval slide of layout grid component
+   * thời gian để chuyển sang 1 slide mới
+   */
   intervalSlide: number = 5000; // 5s
   //#endregion
 
@@ -192,6 +219,13 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
     this.stopAutoSlide();
   }
 
+  /**
+   * Logins layout grid component
+   * đăng nhập hệ thống
+   * @requires userName
+   * @requires passWord
+   * @returns goto đến page mặc định nêu đăng nhập đúng
+   */
   async login() {
     await this.authService.signIn(
       this.userName,
@@ -200,11 +234,19 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
     );
   }
 
-  selectLanguage(lang: string) {
+  /**
+   * Selects language
+   * @param lang vi/en code của 1 ngôn ngử đươc chọn
+   */
+  selectedLanguage(lang: string) {
     this.switchLanguage(lang);
     AppGlobals.setLang(lang); // Lưu vào localStorage
   }
 
+  /**
+   * Switchs language setting lại ngôn ngữ khi người dùng chọn từ giao diện
+   * @param lang vi/en code của 1 ngôn ngử đươc chọn
+   */
   switchLanguage(lang: string) {
     this.translate.use(lang);
     const _index = this.listLanguages.findIndex(
@@ -216,6 +258,10 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
   }
 
   //#region  Funtion Slide
+
+  /**
+   * Starts auto slide start chạy slide
+   */
   startAutoSlide() {
     this.intervalId = setInterval(() => {
       this.nextSlide();
@@ -229,25 +275,24 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
   }
 
   updateSlide(index: number) {
-    this.currentIndex = index;
+    this.currentSlide = index;
   }
 
   nextSlide() {
-    this.currentIndex = (this.currentIndex + 1) % this.listNew.length;
+    this.currentSlide = (this.currentSlide + 1) % this.listNew.length;
   }
 
   prevSlide() {
-    this.currentIndex =
-      (this.currentIndex - 1 + this.listNew.length) % this.listNew.length;
+    this.currentSlide =
+      (this.currentSlide - 1 + this.listNew.length) % this.listNew.length;
   }
   //#endregion
 
-  //#region gotoPage
+  /**
+   * Go tab page mở tab chuyển đến trang yêu cầu
+   * @param event link của trang cần mở
+   */
   goTabPage(event: string) {
-    window.open(event, '_blank');
-  }
-
-  openNews(event: string) {
     window.open(event, '_blank');
   }
 }
