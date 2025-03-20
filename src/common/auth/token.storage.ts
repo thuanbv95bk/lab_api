@@ -7,6 +7,9 @@ export class TokenStorage {
   public static readonly HANDELOGIN = 'handelLogin';
   public static readonly HANDELOGOUT = 'handelLogout';
 
+  /**
+   * Clears token Xóa các key ở localStorage
+   */
   public static clearToken() {
     localStorage.removeItem(this.JWT_TOKEN);
     localStorage.removeItem(this.ISLOGGEDIN);

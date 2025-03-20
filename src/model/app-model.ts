@@ -1,3 +1,8 @@
+/**
+ * Menu phục vụ cho danh sách menu ở màn hình login
+ * @author thuan.bv
+ *
+ */
 export class Menu {
   href: string;
   code: string;
@@ -7,6 +12,10 @@ export class Menu {
   }
 }
 
+/**
+ * News loading danh sách tin tức ở màn hình login
+ * @author thuan.bv
+ */
 export class News {
   index: number | null;
   imageUrl: string;
@@ -22,6 +31,11 @@ export class News {
   }
 }
 
+/**
+ * Branch loading danh sách các chi nhánh ở màn hình login
+ * @author thuan.bv
+ *
+ */
 export class Branch {
   index: number | null;
   name: string;
@@ -33,15 +47,23 @@ export class Branch {
   }
 }
 
+/**
+ * Sub address định chỉ con của từng chi nhanh
+ * @author thuan.bv
+ */
 export class SubAddress {
   index: number | null;
-  Add: string;
+  add: string;
   constructor(obj?: Partial<SubAddress>) {
     this.index = obj?.index || null;
-    this.Add = obj?.Add || '';
+    this.add = obj?.add || '';
   }
 }
 
+/**
+ * Languages loading danh sách các ngôn ngữ
+ * @author thuan.bv
+ */
 export class Languages {
   code: string;
   name: string;
@@ -52,6 +74,10 @@ export class Languages {
     this.flag = obj?.flag || '';
   }
 }
+
+/**
+ * User info thông tin của 1 user khi login
+ */
 export class UserInfo {
   userName: string | null;
   passWord: string | null;

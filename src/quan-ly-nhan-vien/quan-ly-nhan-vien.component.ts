@@ -14,7 +14,9 @@ export class QuanLyNhanVienComponent implements OnInit {
     this.authService.checkLoggedIn();
   }
 
-  // Đăng xuất
+  /**
+   * Signs out sự kiện đăng xuất
+   */
   signOut() {
     this.authService.signOut();
   }

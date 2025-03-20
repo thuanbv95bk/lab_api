@@ -14,11 +14,15 @@ export class AuthService {
     protected httpClient: HttpClient,
     private router: Router
   ) {
-    this.listenLogout();
+    this.listenEvent();
   }
 
-  // tạo sự kiện ĐĂNG XUẤT
-  private listenLogout() {
+  /**
+   * Listens event: Tạo sự kiện để lắng nghe
+   * Khi người dùng đăng xuất -> các tab đã đăng nhập bị logout
+   * Khi người dùng đóng 1 trình duyệt
+   */
+  private listenEvent() {
     window.addEventListener('storage', (event) => {
       if (event.key == TokenStorage.HANDELOGOUT) {
         sessionStorage.removeItem(TokenStorage.ISLOGGEDIN);
@@ -31,11 +35,29 @@ export class AuthService {
     });
   }
 
+  /**
+   * Go page home
+   * Chuyển đến trạng mặc định
+   */
   private goPageHome() {
     this.router.navigateByUrl('quan-ly-nhan-vien');
   }
 
-  // Đăng nhập
+  /**
+   * Go page login
+   * Chuyển đén page login
+   */
+  private goPageLogin() {
+    this.router.navigateByUrl('login');
+  }
+
+  /**
+   * Signs in
+   * @param userName
+   * @param passWord
+   * @param [isRememberMe] true/false trạng thái ghi nhớ đăng nhập
+   * @returns true- đăng nhập thành công và ngược lại
+   */
   async signIn(
     userName: string,
     passWord: string,
@@ -69,14 +91,21 @@ export class AuthService {
     return true;
   }
 
-  //Đăng xuất
+  /**
+   * Signs out đăng xuất
+   * Trả về Page Login hệ thống
+   */
   signOut() {
     TokenStorage.clearToken();
     // Gửi tín hiệu logout cho các tab khác
     localStorage.setItem(TokenStorage.HANDELOGOUT, Date.now().toString());
-    this.router.navigateByUrl('login');
+    this.goPageLogin();
   }
 
+  /**
+   * Checks logged in: kiểm tra trạng thái đăng nhập
+   * @returns  Về page Mặc định hoặc về lại page login nếu mất quyền truy cập
+   */
   checkLoggedIn() {
     //Khôi phục session từ localStorage
     if (localStorage.getItem(TokenStorage.ISLOGGEDIN)) {
@@ -95,7 +124,7 @@ export class AuthService {
     if (sessionStorage.getItem(TokenStorage.ISLOGGEDIN) == 'true') {
       this.goPageHome();
     } else {
-      this.router.navigateByUrl('login');
+      this.goPageLogin();
     }
   }
 }

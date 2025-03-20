@@ -39,7 +39,7 @@
             <a
               class="dropdown-item d-flex align-items-center"
               href="#"
-              (click)="selectLanguage(lang.code)"
+              (click)="selectedLanguage(lang.code)"
             >
               <img [src]="lang.flag" alt="Flag" class="flag-icon me-2" />
               <span class="">{{ lang.name }}</span>
@@ -77,8 +77,8 @@
           <li class="nav-item" *ngFor="let item of listMenu">
             <a
               class="nav-link text-primary"
-              (click)="goTabPage(item.href)"
               href="#"
+              (click)="goTabPage(item.href)"
               >{{ item.code | translate }}
             </a>
           </li>
@@ -92,7 +92,7 @@
 
 <div
   class="carousel-container text-center d-flex h-auto"
-  [style.backgroundImage]="'url(' + listNew[currentIndex].imageUrl + ')'"
+  [style.backgroundImage]="'url(' + listNew[currentSlide].imageUrl + ')'"
 >
   <div class="container-fluid">
     <div class="row gy-2">
@@ -106,17 +106,17 @@
             >
               <div class="col-12 col-lg-10 text-start">
                 <h5 class="fs-6 text-uppercase text-white">
-                  {{ listNew[currentIndex].title }}
+                  {{ listNew[currentSlide].title }}
                 </h5>
                 <p class="caption-text mb-2">
-                  {{ listNew[currentIndex].shortContent }}
+                  {{ listNew[currentSlide].shortContent }}
                 </p>
               </div>
               <div class="col-auto mx-auto text-md-center text-lg-end">
                 <a
                   href="#"
-                  (click)="openNews(listNew[currentIndex].link)"
                   class="btn btn-success px-3 py-2 fs-6 btn-detail"
+                  (click)="goTabPage(listNew[currentSlide].link)"
                 >
                   {{ "btnDetail" | translate }}
                   <i class="fas fa-arrow-right"></i>
@@ -151,6 +151,7 @@
           <div class="input-group input-pass d-flex flex-nowrap">
             <span class="icon"><i class="fas fa-lock"></i></span>
             <input
+              #passwordField
               class="mr-3"
               name="password"
               autocomplete="off"
@@ -159,7 +160,6 @@
               maxlength="200"
               [placeholder]="'passWord' | translate"
               [(ngModel)]="passWord"
-              #passwordField
             />
             <span
               class="fa fa-fw toggle-password"
@@ -212,7 +212,7 @@
     <div
       *ngFor="let img of listNew; let i = index"
       class="outer-circle"
-      [class.active]="i === currentIndex"
+      [class.active]="i === currentSlide"
       (click)="updateSlide(i)"
     >
       <div class="inner-circle"></div>
@@ -229,8 +229,8 @@
         class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl col-xxl pb-1"
       >
         <h5 class="mb-1">{{ itembranch.name }}</h5>
-        <p *ngFor="let Add of itembranch.address; let i1 = index">
-          {{ Add.Add }}
+        <p *ngFor="let item of itembranch.address; let i1 = index">
+          {{ item.add }}
         </p>
       </div>
       <div class="col-12 col-sm-12 col-md col-lg col-xl col-xxl text-center">
