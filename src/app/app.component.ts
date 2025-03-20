@@ -23,7 +23,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   initTranslate() {
     const savedLang = AppGlobals.getLang().toString();
-    console.log(savedLang);
 
     if (!savedLang || savedLang == '') {
       this.translate.setDefaultLang(this.defaultLang);
