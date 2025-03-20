@@ -183,19 +183,21 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
     this.getLanguages = AppGlobals.getLang();
     this.switchLanguage(this.getLanguages);
   }
-
   ngOnInit(): void {
-    // Kiểm tra trạng thai đăng nhập
-    this.authService.checkLoggedIn();
     this.startAutoSlide();
+    this.authService.checkLoggedIn();
   }
 
   ngOnDestroy() {
     this.stopAutoSlide();
   }
 
-  login() {
-    this.authService.signIn(this.userName, this.passWord, this.isRememberMe);
+  async login() {
+    await this.authService.signIn(
+      this.userName,
+      this.passWord,
+      this.isRememberMe
+    );
   }
 
   selectLanguage(lang: string) {
@@ -214,15 +216,12 @@ export class LayoutGridComponent implements OnInit, OnDestroy {
   }
 
   //#region  Funtion Slide
-
-  // Bật chạy Slide
   startAutoSlide() {
     this.intervalId = setInterval(() => {
       this.nextSlide();
     }, this.intervalSlide);
   }
 
-  // Dừng Slide
   stopAutoSlide() {
     if (this.intervalId) {
       clearInterval(this.intervalId);

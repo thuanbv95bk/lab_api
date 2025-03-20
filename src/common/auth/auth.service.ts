@@ -25,6 +25,10 @@ export class AuthService {
         this.router.navigate(['/login']);
       }
     });
+    // Lắng nghe sự kiện đóng trình duyệt để xóa HANDELOGIN
+    window.addEventListener('beforeunload', () => {
+      localStorage.removeItem(TokenStorage.HANDELOGIN);
+    });
   }
 
   private goPageHome() {
@@ -47,6 +51,8 @@ export class AuthService {
         if (isRememberMe == true) {
           localStorage.setItem(TokenStorage.ISLOGGEDIN, 'true');
           localStorage.setItem(TokenStorage.ISREMBERME, 'true');
+        } else {
+          localStorage.removeItem(TokenStorage.ISREMBERME);
         }
         sessionStorage.setItem(TokenStorage.ISLOGGEDIN, 'true');
         localStorage.setItem(TokenStorage.HANDELOGIN, Date.now().toString());
