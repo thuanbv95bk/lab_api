@@ -75,7 +75,7 @@ namespace App.Lab.App.Service.Implement
                         },
                         new ExportExcelConfigRow()
                         {
-                            ColumnFormat=ExportExcelConfigFormatType.Date,
+                            ColumnFormat=ExportExcelConfigFormatType.Text,
                             PropertyName="IssueLicensePlace"
                         },
                         new ExportExcelConfigRow()
