@@ -139,7 +139,7 @@ namespace App.Admin.Controllers
 
         [HttpPost]
         [Route("export-excel")]
-        public async Task<IActionResult> ExportExcel(HrmEmployeesFilterExcel filter)
+        public  IActionResult ExportExcel(HrmEmployeesFilterExcel filter)
         {
             try
             {
@@ -151,7 +151,7 @@ namespace App.Admin.Controllers
                 {
                     return Failure("Chưa có điều kiện tìm kiếm theo công ty, vui lòng thử lại");
                 }
-                var stream = await Task.Run(() => _service.ExportExcel(filter));
+                var stream = _service.ExportExcel(filter);
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             }
             catch (Exception ex)
