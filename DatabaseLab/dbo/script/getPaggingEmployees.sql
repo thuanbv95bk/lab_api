@@ -46,7 +46,7 @@ WHERE FK_CompanyID = @FK_CompanyID
           @LicenseType IS NULL
           OR LicenseType = @LicenseType
       )
-           AND
+      AND
       (
           ISNULL(@ListStringLicenseTypesId, '') = ''
           OR LicenseType IN
