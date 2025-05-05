@@ -5,7 +5,6 @@ using App.Lab.Model;
 using App.Lab.Repository.Interface;
 using Microsoft.AspNetCore.Http;
 using System.Data;
-using System.Security.Cryptography;
 
 
 namespace App.Lab.Repository.Implement
@@ -67,19 +66,21 @@ namespace App.Lab.Repository.Implement
                            "AND ISNULL(IsDeleted, 0) = 0 " +
                            "AND ISNULL(IsLocked, 0) = 0 " +
                            "AND (@Name IS NULL OR Name LIKE '%' + @Name + '%')" +
-                           "AND (@DriverLicense IS NULL OR DriverLicense LIKE '%' + @DriverLicense + '%')" +
-                           "AND (ISNULL(@ListStringLicenseTypesId, '') = '' OR ',' + @ListStringLicenseTypesId + ',' LIKE '%,' + CAST(LicenseType AS NVARCHAR) + ',%' )" +
-                           "AND (ISNULL(@ListStringEmployeesId, '') = '' OR ',' + @ListStringEmployeesId + ',' LIKE '%,' + CAST(PK_EmployeeID AS NVARCHAR) + ',%' )" +
+                           "AND (@DriverLicense IS NULL OR DriverLicense LIKE '%' + @DriverLicense + '%') " +
+                           "AND ( ISNULL(@ListStringLicenseTypesId, '') = '' OR LicenseType IN (SELECT value FROM STRING_SPLIT(@ListStringLicenseTypesId, ','))) " +
+                           "AND (ISNULL(@ListStringEmployeesId, '') = '' OR PK_EmployeeID IN (SELECT value FROM STRING_SPLIT(@ListStringEmployeesId, ','))) " +
                     "ORDER BY DisplayName OFFSET @pageSize * (@pageIndex-1) ROWS FETCH NEXT @pageSize ROWS ONLY"
                 , CommandType.Text
-                , new { FK_CompanyID = filter.FkCompanyId,
-                        Name = filter.DisplayName,
-                        DriverLicense = filter.DriverLicense,
-                        ListStringLicenseTypesId = filter.ListStringLicenseTypesId,
-                        ListStringEmployeesId =filter.ListStringEmployeesId,
+                , new
+                {
+                    FK_CompanyID = filter.FkCompanyId,
+                    Name = filter.DisplayName,
+                    DriverLicense = filter.DriverLicense,
+                    ListStringLicenseTypesId = filter.ListStringLicenseTypesId,
+                    ListStringEmployeesId = filter.ListStringEmployeesId,
 
-                        pageSize = filter.PageSize ,
-                        pageIndex = filter.PageIndex
+                    pageSize = filter.PageSize,
+                    pageIndex = filter.PageIndex
                 }
 
             );
@@ -100,26 +101,26 @@ namespace App.Lab.Repository.Implement
         {
 
             var listItem = this.ExecuteReader<HrmEmployees>
-            (
-               "SELECT PK_EmployeeID AS PkEmployeeID" +
-                          ",CASE WHEN UpdatedDate IS NULL THEN CreatedDate ELSE UpdatedDate END [UpdatedDate]" +
-                          ",DisplayName" +
-                          ",Mobile" +
-                          ",DriverLicense" +
-                          ",IssueLicenseDate" +
-                          ",ExpireLicenseDate" +
-                          ",IssueLicensePlace" +
-                          ",(SELECT B.Name FROM dbo.[BCA.LicenseTypes] B WHERE B.PK_LicenseTypeID = LicenseType) LicenseType " +
-                         
-                    "FROM dbo.[HRM.Employees] " +
-                    "WHERE FK_CompanyID = @FK_CompanyID " +
-                           "AND ISNULL(IsDeleted, 0) = 0 " +
-                           "AND ISNULL(IsLocked, 0) = 0 " +
-                           "AND (@Name IS NULL OR Name LIKE '%' + @Name + '%') " +
-                           "AND (@DriverLicense IS NULL OR DriverLicense LIKE '%' + @DriverLicense + '%') " +
-                           "AND (ISNULL(@ListStringLicenseTypesId, '') = '' OR ',' + @ListStringLicenseTypesId + ',' LIKE '%,' + CAST(LicenseType AS NVARCHAR) + ',%' ) " +
-                           "AND (ISNULL(@ListStringEmployeesId, '') = '' OR ',' + @ListStringEmployeesId + ',' LIKE '%,' + CAST(PK_EmployeeID AS NVARCHAR) + ',%' ) " +
-                    "ORDER BY DisplayName"
+    (
+                "SELECT A.PK_EmployeeID AS PkEmployeeID" +
+                    ",CASE WHEN A.UpdatedDate IS NULL THEN A.CreatedDate ELSE A.UpdatedDate END [UpdatedDate]" +
+                    ",A.DisplayName" +
+                    ",A.Mobile" +
+                    ",A.DriverLicense" +
+                    ",A.IssueLicenseDate" +
+                    ",A.ExpireLicenseDate" +
+                    ",A.IssueLicensePlace" +
+                    ",B.Name AS LicenseType " +
+                "FROM dbo.[HRM.Employees] A " +
+                "LEFT JOIN dbo.[BCA.LicenseTypes] B ON A.LicenseType = B.PK_LicenseTypeID " +
+                "WHERE A.FK_CompanyID = @FK_CompanyID " +
+                      "AND ISNULL(A.IsDeleted, 0) = 0 " +
+                      "AND ISNULL(A.IsLocked, 0) = 0 " +
+                      "AND (@Name IS NULL OR A.Name LIKE '%' + @Name + '%') " +
+                      "AND (@DriverLicense IS NULL OR A.DriverLicense LIKE '%' + @DriverLicense + '%') " +
+                      "AND (@ListStringLicenseTypesId IS NULL OR A.LicenseType IN (SELECT value FROM STRING_SPLIT(@ListStringLicenseTypesId, ','))) " +
+                      "AND (@ListStringEmployeesId IS NULL OR A.PK_EmployeeID IN (SELECT value FROM STRING_SPLIT(@ListStringEmployeesId, ','))) " +
+                "ORDER BY A.DisplayName"
                 , CommandType.Text
                 , new
                 {

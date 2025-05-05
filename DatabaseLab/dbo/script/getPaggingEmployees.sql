@@ -1,12 +1,14 @@
 ﻿DECLARE @FK_CompanyID INT = 15076;
-DECLARE @pageSize INT = 50;
-DECLARE @pageIndex INT = 1;
+
 DECLARE @Name NVARCHAR(100) = N'DAO XUAN TRUONG';
 DECLARE @DriverLicense NVARCHAR(32) = N'';
 DECLARE @LicenseType INT = NULL;
 
-DECLARE @ListEmployeeId NVARCHAR(50) = N'';
+DECLARE @ListStringEmployeesId NVARCHAR(50) = N'';
 DECLARE @ListStringLicenseTypesId NVARCHAR(50) = N'';
+
+DECLARE @pageSize INT = 50;
+DECLARE @pageIndex INT = 1;
 
 SELECT PK_EmployeeID AS PkEmployeeID,
        CASE
@@ -44,14 +46,20 @@ WHERE FK_CompanyID = @FK_CompanyID
           @LicenseType IS NULL
           OR LicenseType = @LicenseType
       )
-      AND
+           AND
       (
-          ISNULL(@ListEmployeeId, '') = ''
-          OR ',' + @ListEmployeeId + ',' LIKE '%,' + CAST(PK_EmployeeID AS NVARCHAR) + ',%'
+          ISNULL(@ListStringLicenseTypesId, '') = ''
+          OR LicenseType IN
+             (
+                 SELECT value FROM STRING_SPLIT(@ListStringLicenseTypesId, ',')
+             )
       )
       AND
       (
-          ISNULL(@ListStringLicenseTypesId, '') = ''
-          OR ',' + @ListStringLicenseTypesId + ',' LIKE '%,' + CAST(LicenseType AS NVARCHAR) + ',%'
+          ISNULL(@ListStringEmployeesId, '') = ''
+          OR PK_EmployeeID IN
+             (
+                 SELECT value FROM STRING_SPLIT(@ListStringEmployeesId, ',')
+             )
       )
 ORDER BY DisplayName OFFSET @pageSize * (@pageIndex - 1) ROWS FETCH NEXT @pageSize ROWS ONLY;
