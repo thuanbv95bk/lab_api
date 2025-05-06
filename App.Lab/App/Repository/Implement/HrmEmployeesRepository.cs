@@ -31,7 +31,7 @@ namespace App.Lab.Repository.Implement
 
             listItem = ExecuteReader<HrmEmployeesCbx>
             (
-                "SELECT PK_EmployeeID as PkEmployeeID , DisplayName, DriverLicense FROM [HRM.Employees] WHERE ISNULL(IsDeleted, 0) = 0 AND ISNULL(IsLocked, 0) = 0 AND FK_CompanyID = @FK_CompanyID ;",
+                "SELECT PK_EmployeeID as PkEmployeeID , DisplayName, DriverLicense FROM [HRM.Employees] WHERE ISNULL(IsDeleted, 0) = 0 AND ISNULL(IsLocked, 0) = 0 AND FK_CompanyID = @FK_CompanyID ORDER BY DisplayName;",
             CommandType.Text,
                 new { FK_CompanyID = FkCompanyID }
             );

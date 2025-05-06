@@ -49,18 +49,18 @@ namespace App.Lab.App.Service.Implement
         /// Modified: date - user - description
         public PagingResult<HrmEmployees> GetPagingToEdit(HrmEmployeesFilter filter)
         {
-            if (string.IsNullOrEmpty(filter.option.Key) || string.IsNullOrEmpty(filter.option.Value))
+            if (string.IsNullOrEmpty(filter.Option.Key) || string.IsNullOrEmpty(filter.Option.Value))
             {
                 filter.DisplayName = "";
                 filter.DriverLicense = "";
             }
-            else if (string.Equals(filter.option.Key.ToLower(), "DisplayName".ToLower()))
+            else if (string.Equals(filter.Option.Key.ToLower(), "DisplayName".ToLower()))
             {
-                filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.option.Value);
+                filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
             }
             else
             {
-                filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.option.Value);
+                filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
             }
                 return _repo.GetPagingToEdit(filter);
         }
@@ -139,21 +139,22 @@ namespace App.Lab.App.Service.Implement
                 {
                     var ws = package.Workbook.Worksheets.Add("DATA");
 
-                    if (string.IsNullOrEmpty(filter.option.Key) || string.IsNullOrEmpty(filter.option.Value))
+                    if (string.IsNullOrEmpty(filter.Option.Key) || string.IsNullOrEmpty(filter.Option.Value))
                     {
                         filter.DisplayName = "";
                         filter.DriverLicense = "";
                     }
-                    else if (string.Equals(filter.option.Key.ToLower(), "DisplayName".ToLower()))
+                    else if (string.Equals(filter.Option.Key.ToLower(), "DisplayName".ToLower()))
                     {
-                        filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.option.Value);
+                        filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
                     }
                     else
                     {
-                        filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.option.Value);
+                        filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
                     }
 
-                    // lay du lieu
+         
+                    /// <summary>lay du lieu </summary>
                     var listData = _repo.GetDataToExcel(filter);
                     string title = string.Empty;
 
@@ -178,12 +179,12 @@ namespace App.Lab.App.Service.Implement
                             Value = filter.ListStringLicenseTypesName
                         });
                     }
-                    if (!string.IsNullOrEmpty(filter.option.Value))
+                    if (!string.IsNullOrEmpty(filter.Option.Value))
                     {
                         listFilter.Add(new Lab.Model.SearchOption
                         {
-                            Key = filter.option.Key == "displayName" ? "Tên lái xe" : "GPLX",
-                            Value = filter.option.Value
+                            Key = filter.Option.Key == "displayName" ? "Tên lái xe" : "GPLX",
+                            Value = filter.Option.Value
                         });
                     }
               

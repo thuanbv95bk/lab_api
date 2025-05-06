@@ -36,13 +36,7 @@ namespace App.Lab.Repository.Implement
             );
             return ret;
 
-            //var ret = ExecuteReader<Users>
-            //(
-            //    "SELECT * FROM [Admin.Users] WHERE FK_CompanyID = @FK_CompanyID AND IsDeleted = @IsDeleted AND IsLock = @IsLock ORDER BY Fullname",
-            //CommandType.Text,
-            //    new { FK_CompanyID = filter.FK_CompanyID, IsDeleted = filter.IsDeleted, IsLock= filter.IsLock }
-            //);
-            //return ret;
+           
         }
     }
 
