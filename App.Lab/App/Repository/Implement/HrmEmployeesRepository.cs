@@ -37,7 +37,7 @@ namespace App.Lab.Repository.Implement
                 "WHERE ISNULL(IsDeleted, 0) = 0 " +
                 "AND ISNULL(IsLocked, 0) = 0 " +
                 "AND FK_CompanyID = @FK_CompanyID " +
-                "ORDER BY DisplayName,DriverLicense ;",
+                "ORDER BY DisplayName ,DriverLicense ;",
             CommandType.Text,
                 new { FK_CompanyID = FkCompanyID }
             );
@@ -82,7 +82,7 @@ namespace App.Lab.Repository.Implement
             {
                 query.Append(
                     "ORDER BY A.DisplayName, A.DriverLicense " +
-                    "OFFSET @pageSize * @pageIndex ROWS FETCH NEXT @pageSize ROWS ONLY");
+                    "OFFSET @pageSize * @pageIndex ROWS FETCH NEXT @pageSize ROWS ONLY;");
             }
             else
             {
@@ -229,6 +229,36 @@ namespace App.Lab.Repository.Implement
                 }
             ));
 
+        }
+
+        /// <summary>Kiểm tra sự tồn tại của danh sách PkEmployeeId trong cơ sở dữ liệu </summary>
+        /// <param name="employeeIds">Danh sách PkEmployeeId cần kiểm tra</param>
+        /// Author: thuanbv
+        /// Created: 07/05/2025
+        /// Modified: date - user - description
+        public IEnumerable<int> GetExistingEmployeeIds(IEnumerable<int> employeeIds)
+        {
+            if (employeeIds == null || !employeeIds.Any())
+            {
+                return new List<int>();
+            }
+
+            // Chuyển danh sách employeeIds thành chuỗi để sử dụng trong câu lệnh SQL
+            var idsString = string.Join(",", employeeIds);
+
+            // Câu lệnh SQL để kiểm tra sự tồn tại
+            var query =
+                "SELECT PK_EmployeeID " +
+                "FROM [HRM.Employees] " +
+                "WHERE PK_EmployeeID IN (" + idsString + ") " +
+                "AND ISNULL(IsDeleted, 0) = 0 " +
+                "AND FK_CompanyId = 15076 " +
+                "AND ISNULL(IsLocked, 0) = 0;";
+
+            // Thực thi truy vấn và trả về danh sách các ID tồn tại
+            var existingIds = ExecuteReader<int>(query, CommandType.Text);
+
+            return existingIds;
         }
     }
 }

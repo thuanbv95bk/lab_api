@@ -44,6 +44,11 @@ namespace App.Common.Helper
     // 
     // *********************************************************************
 
+    /// <summary>Class that hydrates custom business objects with data</summary>
+    /// Author: thuanbv
+    /// Created: 23/04/2025
+    /// Modified: date - user - description
+
     public class CBO
     {
         /// <summary>Gets the property information.</summary>

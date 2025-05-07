@@ -7,7 +7,10 @@ namespace App.Common.BaseService
     {
         public BaseService(IHttpContextAccessor accessor) : base(accessor) { }
     }
-
+    /// <summary>BaseService </summary>
+    /// Author: thuanbv
+    /// Created: 23/04/2025
+    /// Modified: date - user - description
     public class BaseService<TRepository> : BaseService
     {
         protected readonly TRepository _repo;

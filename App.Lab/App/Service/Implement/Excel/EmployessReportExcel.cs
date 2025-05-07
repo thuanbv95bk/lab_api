@@ -159,7 +159,7 @@ namespace App.Lab.App.Service.Implement
                     currColIdx = 2;
                     foreach (var column in rows)
                     {
-                        PropertyInfo info = type.GetProperty(column.PropertyName) as PropertyInfo;
+                        PropertyInfo info = type.GetProperty(column.PropertyName);
                         var value = info.GetValue(item);
 
                         // Kiểm tra nếu cột là kiểu DateTime 

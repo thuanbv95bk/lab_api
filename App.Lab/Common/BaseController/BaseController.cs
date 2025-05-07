@@ -5,6 +5,12 @@ using System.Net;
 namespace App.Common.BaseControllers
 {
     [ApiController]
+
+    /// <summary> dung chung để thiết lâp các repo từ API </summary>
+    /// <param name="data">The data.</param>
+    /// Author: thuan.bv
+    /// Created: 23/04/2025
+    /// Modified: date - user - description
     public class BaseController : ControllerBase
     {
 

@@ -52,5 +52,14 @@ namespace App.Lab.Repository.Interface
         /// Created: 28/04/2025
         /// Modified: date - user - description
         Task DeleteSoft(int employeeId);
+
+
+        /// <summary>Kiểm tra sự tồn tại của danh sách PkEmployeeId trong cơ sở dữ liệu </summary>
+        ///  <param name="employeeIds">Danh sách PkEmployeeId cần kiểm tra</param>
+        /// Author: thuanbv
+        /// Created: 07/05/2025
+        /// Modified: date - user - description
+
+        IEnumerable<int> GetExistingEmployeeIds(IEnumerable<int> employeeIds);
     }
 }
