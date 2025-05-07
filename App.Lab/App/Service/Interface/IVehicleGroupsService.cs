@@ -10,6 +10,11 @@ using System.Threading.Tasks;
 
 namespace App.Lab.App.Service.Interface
 {
+
+    /// <summary> Interface các hàm liên quan đến danh sách nhóm xe</summary>
+    /// Author: thuanbv
+    /// Created: 22/04/2025
+    /// Modified: date - user - description
     public interface IVehicleGroupsService : IBaseService
     {
         /// <summary>Danh sách nhóm phương tiện chưa được gán</summary>

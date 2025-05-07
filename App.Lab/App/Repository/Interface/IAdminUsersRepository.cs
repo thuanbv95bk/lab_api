@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 
 namespace App.Lab.Repository.Interface
 {
-
+    /// <summary>interface các ham liên quan đến user</summary>
+    /// Author: thuanbv
+    /// Created: 22/04/2025
+    /// Modified: date - user - description
     public interface IAdminUsersRepository
     {
         /// <summary>Lấy danh sách user</summary>

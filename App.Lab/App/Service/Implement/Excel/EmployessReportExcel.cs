@@ -9,12 +9,16 @@ using static App.Lab.Common.Helper.ExcelHelp;
 
 namespace App.Lab.App.Service.Implement
 {
-    /// <summary> Tạo danh sách tiêu đề cho báo cáo Excel. </summary>
+    /// <summary> fill file excel  </summary>
     /// Author: thuanbv
     /// Created: 29/04/2025
     /// Modified: date - user - description
     public static class EmployessReportExcel
     {
+        /// <summary> Tạo danh sách tiêu đề cho báo cáo Excel. </summary>
+        /// Author: thuanbv
+        /// Created: 29/04/2025
+        /// Modified: date - user - description
         public static List<string> Title()
         {
             var lstTitle = new List<string>();
@@ -74,7 +78,7 @@ namespace App.Lab.App.Service.Implement
                 new ExportExcelConfigRow()
                 {
                     ColumnFormat=ExportExcelConfigFormatType.Text,
-                    PropertyName="LicenseType"
+                    PropertyName="LicenseTypeName"
                 },
                 new ExportExcelConfigRow()
                 {
@@ -190,6 +194,7 @@ namespace App.Lab.App.Service.Implement
 
                 //autofit columns 
                 ws.Cells[1, 1, currRowIdx, totalCols].AutoFitColumns();
+                ws.Cells[1, 1, currRowIdx - 1, totalCols].Style.WrapText = true;
 
                 //font
                 ws.Cells[1, 1, currRowIdx - 1, totalCols].Style.Font.Name = "Times New Roman";

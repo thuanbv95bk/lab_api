@@ -6,6 +6,11 @@ namespace App.Admin.Controllers
 {
     [ApiController]
     [Route("api/user")]
+
+    /// <summary> Controller API liên quan đến User </summary>
+    /// Author: thuanbv
+    /// Created: 07/05/2025
+    /// Modified: date - user - description
     public class AdminUsersController : BaseController
     {
         private readonly IAdminUsersService _service;

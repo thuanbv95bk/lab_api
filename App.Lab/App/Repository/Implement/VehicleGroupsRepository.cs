@@ -14,7 +14,10 @@ using System.Threading.Tasks;
 
 namespace App.Lab.Repository.Implement
 {
-
+    /// <summary>Repository các ham liên quan đến nhóm xe </summary>
+    /// Author: thuanbv
+    /// Created: 22/04/2025
+    /// Modified: date - user - description
     public class VehicleGroupsRepository : Repo, IVehicleGroupsRepository
     {
         public VehicleGroupsRepository(IUnitOfWork unitOfWork) : base(unitOfWork) { Schema = "Vehicle"; }

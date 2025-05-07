@@ -77,7 +77,7 @@ namespace App.Lab.App.Service.Implement
             {
                 if (!items.Any())
                 {
-                    return  ServiceStatus.Failure("Danh sách trống!");
+                    return ServiceStatus.Failure("Danh sách trống!");
                 }
 
                 using (_uow.BeginTransaction())

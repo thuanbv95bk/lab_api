@@ -7,6 +7,11 @@ namespace App.Admin.Controllers
 {
     [ApiController]
     [Route("api/bca-license-types")]
+
+    /// <summary> Controller API liên quan các loại bằng lái </summary>
+    /// Author: thuanbv
+    /// Created: 07/05/2025
+    /// Modified: date - user - description
     public class BcaLicenseTypesController : BaseController
     {
         private readonly IBcaLicenseTypesService _service;

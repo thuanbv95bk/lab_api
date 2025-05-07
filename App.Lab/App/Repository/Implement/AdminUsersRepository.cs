@@ -10,6 +10,11 @@ using System.Runtime.CompilerServices;
 
 namespace App.Lab.Repository.Implement
 {
+
+    /// <summary>Repository các ham liên quan đến User </summary>
+    /// Author: thuanbv
+    /// Created: 22/04/2025
+    /// Modified: date - user - description
     public class AdminUsersRepository : Repo, IAdminUsersRepository
     {
         public AdminUsersRepository(IUnitOfWork unitOfWork) : base(unitOfWork) { Schema = "Admin"; }

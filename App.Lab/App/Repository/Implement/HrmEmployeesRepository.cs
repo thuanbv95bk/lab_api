@@ -5,6 +5,7 @@ using App.Lab.Model;
 using App.Lab.Repository.Interface;
 using Microsoft.AspNetCore.Http;
 using System.Data;
+using System.Text;
 
 
 namespace App.Lab.Repository.Implement
@@ -31,12 +32,64 @@ namespace App.Lab.Repository.Implement
 
             listItem = ExecuteReader<HrmEmployeesCbx>
             (
-                "SELECT PK_EmployeeID as PkEmployeeID , DisplayName, DriverLicense FROM [HRM.Employees] WHERE ISNULL(IsDeleted, 0) = 0 AND ISNULL(IsLocked, 0) = 0 AND FK_CompanyID = @FK_CompanyID ORDER BY DisplayName;",
+                "SELECT PK_EmployeeID as PkEmployeeID , LTRIM(DisplayName) as DisplayName, DriverLicense " +
+                "FROM [HRM.Employees] " +
+                "WHERE ISNULL(IsDeleted, 0) = 0 " +
+                "AND ISNULL(IsLocked, 0) = 0 " +
+                "AND FK_CompanyID = @FK_CompanyID " +
+                "ORDER BY DisplayName,DriverLicense ;",
             CommandType.Text,
                 new { FK_CompanyID = FkCompanyID }
             );
 
             return listItem;
+        }
+
+        /// <summary> hàm lấy data của lái xe, tùy chọn có paging hoặc không
+        /// lái xe thuộc công ty với điều kiện không bị khóa (IsLocked), xóa (IsDeleted)</summary>
+        /// <param name="includePaging">có phân trang hay không?</param>
+        /// Author: thuanbv
+        /// Created: 07/05/2025
+        /// Modified: date - user - description
+
+        private string BuildQueryGetListHrmEmployees(bool includePaging)
+        {
+            var query = new StringBuilder();
+            // Base query
+            query.Append(
+                   "SELECT A.PK_EmployeeID AS PkEmployeeID" +
+                    ",CASE WHEN A.UpdatedDate IS NULL THEN A.CreatedDate ELSE A.UpdatedDate END [UpdatedDate]" +
+                    ",LTRIM(DisplayName) as DisplayName" +
+                    ",A.Mobile" +
+                    ",A.DriverLicense" +
+                    ",A.IssueLicenseDate" +
+                    ",A.ExpireLicenseDate" +
+                    ",A.IssueLicensePlace" +
+                    ",B.Name AS LicenseTypeName " +
+                    ",A.LicenseType AS LicenseType " +
+                    ",COUNT(*) OVER () AS TotalCount " +
+                "FROM dbo.[HRM.Employees] A " +
+                "LEFT JOIN dbo.[BCA.LicenseTypes] B ON A.LicenseType = B.PK_LicenseTypeID " +
+                "WHERE A.FK_CompanyID = @FK_CompanyID " +
+                      "AND ISNULL(A.IsDeleted, 0) = 0 " +
+                      "AND ISNULL(A.IsLocked, 0) = 0 " +
+                      "AND (@Name IS NULL OR A.Name LIKE '%' + @Name + '%') " +
+                      "AND (@DriverLicense IS NULL OR A.DriverLicense LIKE '%' + @DriverLicense + '%') " +
+                      "AND (@ListStringLicenseTypesId IS NULL OR A.LicenseType IN (SELECT value FROM STRING_SPLIT(@ListStringLicenseTypesId, ','))) " +
+                      "AND (@ListStringEmployeesId IS NULL OR A.PK_EmployeeID IN (SELECT value FROM STRING_SPLIT(@ListStringEmployeesId, ','))) ");
+
+            if (includePaging)
+            {
+                query.Append(
+                    "ORDER BY A.DisplayName, A.DriverLicense " +
+                    "OFFSET @pageSize * @pageIndex ROWS FETCH NEXT @pageSize ROWS ONLY");
+            }
+            else
+            {
+                query.Append("ORDER BY A.DisplayName, A.DriverLicense");
+            }
+
+            return query.ToString();
         }
 
         /// <summary>Lấy danh sách lái xe theo điều kiện và theo Paging </summary>
@@ -51,31 +104,13 @@ namespace App.Lab.Repository.Implement
             (
                 out List<HrmEmployees> listItem
                 , out int TotalCount
-                , "SELECT PK_EmployeeID AS PkEmployeeID" +
-                          ",CASE WHEN UpdatedDate IS NULL THEN CreatedDate ELSE UpdatedDate END [UpdatedDate]" +
-                          ",DisplayName" +
-                          ",Mobile" +
-                          ",DriverLicense" +
-                          ",IssueLicenseDate" +
-                          ",ExpireLicenseDate" +
-                          ",IssueLicensePlace" +
-                          ",LicenseType" +
-                          ",COUNT(*) OVER () AS TotalCount " +
-                    "FROM dbo.[HRM.Employees] " +
-                    "WHERE FK_CompanyID = @FK_CompanyID " +
-                           "AND ISNULL(IsDeleted, 0) = 0 " +
-                           "AND ISNULL(IsLocked, 0) = 0 " +
-                           "AND (@Name IS NULL OR Name LIKE '%' + @Name + '%')" +
-                           "AND (@DriverLicense IS NULL OR DriverLicense LIKE '%' + @DriverLicense + '%') " +
-                           "AND ( ISNULL(@ListStringLicenseTypesId, '') = '' OR LicenseType IN (SELECT value FROM STRING_SPLIT(@ListStringLicenseTypesId, ','))) " +
-                           "AND (ISNULL(@ListStringEmployeesId, '') = '' OR PK_EmployeeID IN (SELECT value FROM STRING_SPLIT(@ListStringEmployeesId, ','))) " +
-                    "ORDER BY DisplayName OFFSET @pageSize * (@pageIndex-1) ROWS FETCH NEXT @pageSize ROWS ONLY"
+                , BuildQueryGetListHrmEmployees(true)
                 , CommandType.Text
                 , new
                 {
                     FK_CompanyID = filter.FkCompanyId,
-                    Name = filter.DisplayName,
-                    DriverLicense = filter.DriverLicense,
+                    Name = filter.DisplayName?.Trim(),
+                    DriverLicense = filter.DriverLicense?.Trim(),
                     ListStringLicenseTypesId = filter.ListStringLicenseTypesId,
                     ListStringEmployeesId = filter.ListStringEmployeesId,
 
@@ -101,32 +136,14 @@ namespace App.Lab.Repository.Implement
         {
 
             var listItem = this.ExecuteReader<HrmEmployees>
-    (
-                "SELECT A.PK_EmployeeID AS PkEmployeeID" +
-                    ",CASE WHEN A.UpdatedDate IS NULL THEN A.CreatedDate ELSE A.UpdatedDate END [UpdatedDate]" +
-                    ",A.DisplayName" +
-                    ",A.Mobile" +
-                    ",A.DriverLicense" +
-                    ",A.IssueLicenseDate" +
-                    ",A.ExpireLicenseDate" +
-                    ",A.IssueLicensePlace" +
-                    ",B.Name AS LicenseType " +
-                "FROM dbo.[HRM.Employees] A " +
-                "LEFT JOIN dbo.[BCA.LicenseTypes] B ON A.LicenseType = B.PK_LicenseTypeID " +
-                "WHERE A.FK_CompanyID = @FK_CompanyID " +
-                      "AND ISNULL(A.IsDeleted, 0) = 0 " +
-                      "AND ISNULL(A.IsLocked, 0) = 0 " +
-                      "AND (@Name IS NULL OR A.Name LIKE '%' + @Name + '%') " +
-                      "AND (@DriverLicense IS NULL OR A.DriverLicense LIKE '%' + @DriverLicense + '%') " +
-                      "AND (@ListStringLicenseTypesId IS NULL OR A.LicenseType IN (SELECT value FROM STRING_SPLIT(@ListStringLicenseTypesId, ','))) " +
-                      "AND (@ListStringEmployeesId IS NULL OR A.PK_EmployeeID IN (SELECT value FROM STRING_SPLIT(@ListStringEmployeesId, ','))) " +
-                "ORDER BY A.DisplayName"
+            (
+                BuildQueryGetListHrmEmployees(false)
                 , CommandType.Text
                 , new
                 {
                     FK_CompanyID = filter.FkCompanyId,
-                    Name = filter.DisplayName,
-                    DriverLicense = filter.DriverLicense,
+                    Name = filter.DisplayName?.Trim(),
+                    DriverLicense = filter.DriverLicense?.Trim(),
                     ListStringLicenseTypesId = filter.ListStringLicenseTypesId,
                     ListStringEmployeesId = filter.ListStringEmployeesId,
                 }
@@ -148,17 +165,17 @@ namespace App.Lab.Repository.Implement
 
             string sql =
                "UPDATE [HRM.Employees] SET " +
-                            " DisplayName = @DisplayName " +
-                            ",Name = @Name " +
-                            ",Mobile = @Mobile " +
-                            ",DriverLicense = @DriverLicense" +
-                            ",IssueLicenseDate = @IssueLicenseDate " +
-                            ",ExpireLicenseDate = @ExpireLicenseDate " +
-                            ",IssueLicensePlace = @IssueLicensePlace " +
-                            ",LicenseType = @LicenseType" +
-                            ",UpdatedDate = @UpdatedDate" +
-                            ",UpdatedByUser = @UpdatedByUser " +
-                           "WHERE PK_EmployeeID = @PK_EmployeeID;";
+                    " DisplayName = @DisplayName " +
+                    ",Name = @Name " +
+                    ",Mobile = @Mobile " +
+                    ",DriverLicense = @DriverLicense" +
+                    ",IssueLicenseDate = @IssueLicenseDate " +
+                    ",ExpireLicenseDate = @ExpireLicenseDate " +
+                    ",IssueLicensePlace = @IssueLicensePlace " +
+                    ",LicenseType = @LicenseType" +
+                    ",UpdatedDate = @UpdatedDate" +
+                    ",UpdatedByUser = @UpdatedByUser " +
+                "WHERE PK_EmployeeID = @PK_EmployeeID;";
             return Task.Run(() => this.ExecuteScalar<int>
             (
                 sql
@@ -195,10 +212,10 @@ namespace App.Lab.Repository.Implement
 
             string sql =
                "UPDATE [HRM.Employees] SET " +
-                            "IsDeleted = 1 " +
-                            ",UpdatedDate = @UpdatedDate" +
-                            ",UpdatedByUser = @UpdatedByUser " +
-                           "WHERE PK_EmployeeID = @PK_EmployeeID;";
+                    "IsDeleted = 1 " +
+                    ",UpdatedDate = @UpdatedDate" +
+                    ",UpdatedByUser = @UpdatedByUser " +
+                "WHERE PK_EmployeeID = @PK_EmployeeID;";
             return Task.Run(() => this.ExecuteScalar<int>
             (
                 sql

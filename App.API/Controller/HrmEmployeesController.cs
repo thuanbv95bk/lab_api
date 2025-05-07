@@ -9,6 +9,11 @@ namespace App.Admin.Controllers
 {
     [ApiController]
     [Route("api/hrm-employees")]
+
+    /// <summary> Controller API liên quan đến danh sách lái xe </summary>
+    /// Author: thuanbv
+    /// Created: 07/05/2025
+    /// Modified: date - user - description
     public class HrmEmployeesController : BaseController
     {
         private readonly IHrmEmployeesService _service;

@@ -11,6 +11,11 @@ using System.Collections.Immutable;
 
 namespace App.Lab.App.Service.Implement
 {
+
+    /// <summary> Service liên quan đến các nhóm xe </summary>
+    /// Author: thuanbv
+    /// Created: 07/05/2025
+    /// Modified: date - user - description
     public class VehicleGroupsService : BaseService<IVehicleGroupsRepository>, IVehicleGroupsService
     {
         private readonly IUnitOfWork _uow;

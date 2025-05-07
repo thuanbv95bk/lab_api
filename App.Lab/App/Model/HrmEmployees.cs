@@ -69,7 +69,9 @@ namespace App.Lab.Model
         public string IssueLicensePlace { get; set; }
 
         /// <summary>Loại bằng lái (ID)</summary>
-        public string LicenseType { get; set; }
+        public int? LicenseType { get; set; }
+        /// <summary>Tên Loại bằng lái </summary>
+        public string LicenseTypeName { get; set; }
 
         /// <summary>Ngày cập nhật</summary>
         public DateTime? UpdatedDate { get; set; }

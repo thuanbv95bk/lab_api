@@ -13,7 +13,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace App.Lab.Service.Implement
 {
-
+    /// <summary> Service liên quan đến các nhóm xe đã gán </summary>
+    /// Author: thuanbv
+    /// Created: 07/05/2025
+    /// Modified: date - user - description
     public class AdminUserVehicleGroupService : BaseService<IAdminUserVehicleGroupRepository>, IAdminUserVehicleGroupService
     {
         private readonly IUnitOfWork _uow;

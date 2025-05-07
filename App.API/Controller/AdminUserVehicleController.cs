@@ -7,6 +7,11 @@ namespace App.Admin.Controllers
 {
     [ApiController]
     [Route("api/user-vehicle-group")]
+
+    /// <summary> Controller API liên quan đến các nhóm xe đã gán cho người dùng </summary>
+    /// Author: thuanbv
+    /// Created: 07/05/2025
+    /// Modified: date - user - description
     public class AdminUserVehicleController : BaseController
     {
         private readonly IAdminUserVehicleGroupService _service;
