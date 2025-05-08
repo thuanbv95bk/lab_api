@@ -242,28 +242,22 @@ namespace App.Lab.Repository.Implement
             {
                 return new List<int>();
             }
-
+        
             // Chuyển danh sách employeeIds thành chuỗi để sử dụng trong câu lệnh SQL
             var idsString = string.Join(",", employeeIds);
-
+        
             // Câu lệnh SQL để kiểm tra sự tồn tại
             var query =
                 "SELECT PK_EmployeeID " +
                 "FROM [HRM.Employees] " +
-                "WHERE PK_EmployeeID IN (@idsString) " +
+                "WHERE PK_EmployeeID IN (" + idsString + ") " +
                 "AND ISNULL(IsDeleted, 0) = 0 " +
-                "AND FK_CompanyId = @FK_CompanyID " +
+                "AND FK_CompanyId = 15076 " +
                 "AND ISNULL(IsLocked, 0) = 0;";
-
+        
             // Thực thi truy vấn và trả về danh sách các ID tồn tại
-            var existingIds = ExecuteReader<int>(query, CommandType.Text,
-            new
-            {
-                idsString = idsString,
-                FK_CompanyID = 15076,
-
-            });
-
+            var existingIds = ExecuteReader<int>(query, CommandType.Text);
+        
             return existingIds;
         }
     }
