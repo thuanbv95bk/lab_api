@@ -1,13 +1,31 @@
-﻿DECLARE @FK_CompanyID INT = 15076;
+﻿
 
-DECLARE @Name NVARCHAR(100) = N'DAO XUAN TRUONG';
+-- =============================================
+-- Author: thuan.bv
+-- Create date: 28/04/2025
+-- Description: Lấy ra  danh sách [HRM.Employees]  
+-- danh sách lái xe thuộc công ty với điều kiện tìm kiếm theo người dùng
+-- =============================================
+
+DECLARE @FK_CompanyID INT = 15076;
+-- Tên
+DECLARE @Name NVARCHAR(100) = N'';
+
+-- Giấy phép lái xe
 DECLARE @DriverLicense NVARCHAR(32) = N'';
+
+-- ID của giấy phép lái xe
 DECLARE @LicenseType INT = NULL;
 
+-- Danh sách Id lái xe example (1,2,3)
 DECLARE @ListStringEmployeesId NVARCHAR(50) = N'';
+
+-- Danh sách Id số giấy phép lái xe; example (1,2,3)
 DECLARE @ListStringLicenseTypesId NVARCHAR(50) = N'';
 
+-- Số dòng dữ liệu mỗi trang 
 DECLARE @pageSize INT = 50;
+-- Số thứ tự của trang (bắt đầu từ 1, 2, 3,...).
 DECLARE @pageIndex INT = 1;
 
 SELECT PK_EmployeeID AS PkEmployeeID,
@@ -18,6 +36,7 @@ SELECT PK_EmployeeID AS PkEmployeeID,
                UpdatedDate
        END [UpdatedDate],
        DisplayName,
+       [Name],
        Mobile,
        DriverLicense,
        IssueLicenseDate,
@@ -33,12 +52,12 @@ WHERE FK_CompanyID = @FK_CompanyID
       AND ISNULL(IsLocked, 0) = 0
       AND
       (
-          @Name IS NULL
-          OR Name LIKE '%' + Name + '%'
+          ISNULL(@Name, '') = ''
+          OR [Name] LIKE '%' + @Name + '%'
       )
       AND
       (
-          @DriverLicense IS NULL
+          ISNULL(@DriverLicense, '') = ''
           OR DriverLicense LIKE '%' + @DriverLicense + '%'
       )
       AND
@@ -46,7 +65,7 @@ WHERE FK_CompanyID = @FK_CompanyID
           @LicenseType IS NULL
           OR LicenseType = @LicenseType
       )
-           AND
+      AND
       (
           ISNULL(@ListStringLicenseTypesId, '') = ''
           OR LicenseType IN
@@ -62,4 +81,5 @@ WHERE FK_CompanyID = @FK_CompanyID
                  SELECT value FROM STRING_SPLIT(@ListStringEmployeesId, ',')
              )
       )
-ORDER BY DisplayName OFFSET @pageSize * (@pageIndex - 1) ROWS FETCH NEXT @pageSize ROWS ONLY;
+ORDER BY DisplayName OFFSET @pageSize * (@pageIndex - 1) ROWS --Bỏ qua một số lượng dòng nhất định.
+FETCH NEXT @pageSize ROWS ONLY; --Lấy tiếp số dòng bằng với @pageSize

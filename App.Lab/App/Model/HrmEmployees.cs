@@ -11,7 +11,7 @@ namespace App.Lab.Model
     public class HrmEmployeesCbx
     {
         /// <summary> Id lái xe</summary>
-        public int pkEmployeeId { get; set; }
+        public int PkEmployeeId { get; set; }
 
         /// <summary> Tên hiển thị</summary>
         public string DisplayName { get; set; }
@@ -69,7 +69,9 @@ namespace App.Lab.Model
         public string IssueLicensePlace { get; set; }
 
         /// <summary>Loại bằng lái (ID)</summary>
-        public string LicenseType { get; set; }
+        public int? LicenseType { get; set; }
+        /// <summary>Tên Loại bằng lái </summary>
+        public string LicenseTypeName { get; set; }
 
         /// <summary>Ngày cập nhật</summary>
         public DateTime? UpdatedDate { get; set; }
@@ -99,7 +101,8 @@ namespace App.Lab.Model
         /// <summary> Loại giấy phép lái xe </summary>
         public string ListStringLicenseTypesId { get; set; }
 
-        public SearchOption option { get; set; }
+        /// <summary> Tùy chọn tìm kiếm với cặp khóa-giá trị </summary>
+        public SearchOption Option { get; set; }
 
     }
     /// <summary> Bộ lọc danh sách lái xe, kèm PagingFilter </summary>
@@ -128,8 +131,8 @@ namespace App.Lab.Model
 
         /// <summary>Danh sách tên giấy phép lái xe </summary>
         public string ListStringLicenseTypesName { get; set; }
-
-        public SearchOption option { get; set; }
+        /// <summary> Tùy chọn tìm kiếm với cặp khóa-giá trị </summary>
+        public SearchOption Option { get; set; }
 
     }
     /// <summary>Tùy chọn tìm kiếm với cặp khóa-giá trị</summary>

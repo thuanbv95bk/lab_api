@@ -49,18 +49,18 @@ namespace App.Lab.App.Service.Implement
         /// Modified: date - user - description
         public PagingResult<HrmEmployees> GetPagingToEdit(HrmEmployeesFilter filter)
         {
-            if (string.IsNullOrEmpty(filter.option.Key) || string.IsNullOrEmpty(filter.option.Value))
+            if (string.IsNullOrEmpty(filter.Option.Key) || string.IsNullOrEmpty(filter.Option.Value))
             {
                 filter.DisplayName = "";
                 filter.DriverLicense = "";
             }
-            else if (string.Equals(filter.option.Key.ToLower(), "DisplayName".ToLower()))
+            else if (string.Equals(filter.Option.Key.ToLower(), "DisplayName".ToLower()))
             {
-                filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.option.Value);
+                filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
             }
             else
             {
-                filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.option.Value);
+                filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
             }
                 return _repo.GetPagingToEdit(filter);
         }
@@ -77,7 +77,22 @@ namespace App.Lab.App.Service.Implement
             {
                 if (!items.Any())
                 {
-                    return  ServiceStatus.Failure("Danh sách trống!");
+                    return ServiceStatus.Failure("Danh sách trống!");
+                }
+
+                // Lấy danh sách PkEmployeeId từ items
+                var employeeIds = items.Select(x => x.PkEmployeeId);
+
+                // Kiểm tra sự tồn tại của các PkEmployeeId trong cơ sở dữ liệu
+                if (!employeeIds.Any()) return ServiceStatus.Failure("Danh sách trống!");
+
+                var existingIds =  _repo.GetExistingEmployeeIds(employeeIds);
+
+                var invalidIds = employeeIds.Except(existingIds);
+
+                if (invalidIds.Any())
+                {
+                    return ServiceStatus.Failure($"Lỗi: Các PkEmployeeId sau không tồn tại trong cơ sở dữ liệu: {string.Join(", ", invalidIds)}");
                 }
 
                 using (_uow.BeginTransaction())
@@ -139,20 +154,21 @@ namespace App.Lab.App.Service.Implement
                 {
                     var ws = package.Workbook.Worksheets.Add("DATA");
 
-                    if (string.IsNullOrEmpty(filter.option.Key) || string.IsNullOrEmpty(filter.option.Value))
+                    if (string.IsNullOrEmpty(filter.Option.Key) || string.IsNullOrEmpty(filter.Option.Value))
                     {
                         filter.DisplayName = "";
                         filter.DriverLicense = "";
                     }
-                    else if (string.Equals(filter.option.Key.ToLower(), "DisplayName".ToLower()))
+                    else if (string.Equals(filter.Option.Key.ToLower(), "DisplayName".ToLower()))
                     {
-                        filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.option.Value);
+                        filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
                     }
                     else
                     {
-                        filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.option.Value);
+                        filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
                     }
 
+         
                     // lay du lieu
                     var listData = _repo.GetDataToExcel(filter);
                     string title = string.Empty;
@@ -161,7 +177,15 @@ namespace App.Lab.App.Service.Implement
 
                     title = "THÔNG TIN LÁI XE";
 
-              
+                    if (!string.IsNullOrEmpty(filter.Option.Value))
+                    {
+                        listFilter.Add(new Lab.Model.SearchOption
+                        {
+                            Key = filter.Option.Key == "displayName" ? "Tên lái xe" : "GPLX",
+                            Value = filter.Option.Value
+                        });
+                    }
+
                     if (!string.IsNullOrEmpty(filter.ListStringEmployeesId))
                     {
                         listFilter.Add(new Lab.Model.SearchOption
@@ -178,14 +202,7 @@ namespace App.Lab.App.Service.Implement
                             Value = filter.ListStringLicenseTypesName
                         });
                     }
-                    if (!string.IsNullOrEmpty(filter.option.Value))
-                    {
-                        listFilter.Add(new Lab.Model.SearchOption
-                        {
-                            Key = filter.option.Key == "displayName" ? "Tên lái xe" : "GPLX",
-                            Value = filter.option.Value
-                        });
-                    }
+                    
               
                     EmployessReportExcel.FillExcell(ws, title, listFilter, 1, listData, EmployessReportExcel.HeaderRows());
 

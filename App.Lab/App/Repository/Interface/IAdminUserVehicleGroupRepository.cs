@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace App.Lab.Repository.Interface
 {
+    /// <summary>interface các ham liên quan đến nhóm xe đã gán </summary>
+    /// Author: thuanbv
+    /// Created: 22/04/2025
+    /// Modified: date - user - description
     public interface IAdminUserVehicleGroupRepository
     {
         /// <summary>Tạo mới 1 nhóm phương tiện theo user</summary>

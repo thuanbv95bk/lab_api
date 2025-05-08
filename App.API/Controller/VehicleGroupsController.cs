@@ -8,6 +8,11 @@ namespace App.Admin.Controllers
 {
     [ApiController]
     [Route("api/groups")]
+
+    /// <summary> Controller API  </summary>
+    /// Author: thuanbv
+    /// Created: 29/04/2025
+    /// Modified: date - user - description
     public class VehicleGroupsController : BaseController
     {
         private readonly IVehicleGroupsService _service;

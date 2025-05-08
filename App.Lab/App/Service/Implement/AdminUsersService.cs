@@ -12,6 +12,11 @@ using System.Threading.Tasks;
 
 namespace App.Lab.Service.Implement
 {
+
+    /// <summary> Service liên quan đến người dùng </summary>
+    /// Author: thuanbv
+    /// Created: 07/05/2025
+    /// Modified: date - user - description
     public class AdminUsersService : BaseService<IAdminUsersRepository>, IAdminUsersService
     {
         private readonly IUnitOfWork _uow;

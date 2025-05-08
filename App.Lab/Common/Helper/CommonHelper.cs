@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 namespace App.Common.Helper
 {
-    /// <summary> </summary>
+    /// <summary> CÁC core xử lý liên quan đến string </summary>
     /// Author: thuanbv
     /// Created: 23/04/2025
     /// Modified: date - user - description

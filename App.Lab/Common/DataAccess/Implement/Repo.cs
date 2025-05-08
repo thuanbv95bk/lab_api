@@ -449,8 +449,8 @@ namespace App.DataAccess
         /// <param name="ret">The ret.</param>
         /// <param name="tableName">Name of the table.</param>
         /// <param name="lstColumn">The LST column.</param>
-        /// <param name="lstFilterOption">The LST filter option.</param>
-        /// <param name="lstOrderOption">The LST order option.</param>
+        /// <param name="lstFilterOption">The LST filter Option.</param>
+        /// <param name="lstOrderOption">The LST order Option.</param>
         /// <exception cref="System.Exception">sqlCommand: " + sqlCommand + ": " + ex.ToString()</exception>
         /// Author: thuanbv
         /// Created: 23/04/2025
