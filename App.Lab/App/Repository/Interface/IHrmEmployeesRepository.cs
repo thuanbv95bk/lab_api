@@ -61,5 +61,11 @@ namespace App.Lab.Repository.Interface
         /// Modified: date - user - description
 
         IEnumerable<int> GetExistingEmployeeIds(IEnumerable<int> employeeIds);
+
+        /// <summary>Kiểm tra sự tồn tại của danh sách theo tên và giấy phép lái xe trong cơ sở dữ liệu </summary>
+        /// Author: thuanbv
+        /// Created: 08/05/2025
+        /// Modified: date - user - description
+        List<HrmEmployees> GetCheckExistingEmployeeByNameAndDriverLicense(IEnumerable<string> listName, IEnumerable<string> listDriverLicense);
     }
 }

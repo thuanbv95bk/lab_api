@@ -31,6 +31,7 @@ namespace App.Lab.App.Service.Implement
             lstTitle.Add("Ngày hết hạn");
             lstTitle.Add("Nơi cấp");
             lstTitle.Add("Loại bằng");
+            lstTitle.Add("Hiệu lực");
             lstTitle.Add("Ngày cập nhật");
 
             return lstTitle;
@@ -79,6 +80,11 @@ namespace App.Lab.App.Service.Implement
                 {
                     ColumnFormat=ExportExcelConfigFormatType.Text,
                     PropertyName="LicenseTypeName"
+                },
+                new ExportExcelConfigRow()
+                {
+                    ColumnFormat=ExportExcelConfigFormatType.Text,
+                    PropertyName="ActiveValue"
                 },
                 new ExportExcelConfigRow()
                 {

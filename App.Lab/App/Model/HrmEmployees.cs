@@ -78,6 +78,8 @@ namespace App.Lab.Model
 
         /// <summary>Ngày tạo</summary>
         public DateTime? CreatedDate { get; set; }
+        /// <summary>Hiệu lực</summary>
+        public string ActiveValue { get; set; } 
     }
 
     /// <summary> Bộ lọc danh sách lái xe, kèm PagingFilter </summary>
@@ -94,6 +96,9 @@ namespace App.Lab.Model
 
         /// <summary> Số giấy phép lái xe</summary>
         public string DriverLicense { get; set; }
+
+        /// <summary> Nơi cấp giấy phép lái xe</summary>
+        public string IssueLicensePlace { get; set; }
 
         /// <summary> Danh sách Id của lái xe cần lấy ra </summary>
         public string ListStringEmployeesId { get; set; }
@@ -119,6 +124,8 @@ namespace App.Lab.Model
 
         /// <summary> Số giấy phép lái xe</summary>
         public string DriverLicense { get; set; }
+        /// <summary> Nơi cấp giấy phép lái xe</summary>
+        public string IssueLicensePlace { get; set; }
 
         /// <summary> Danh sách Id của lái xe cần lấy ra </summary>
         public string ListStringEmployeesId { get; set; }
@@ -146,6 +153,9 @@ namespace App.Lab.Model
 
         /// <summary>Giá trị tìm kiếm</summary>
         public string Value { get; set; }
+
+        /// <summary>Tên hiển thị trên UI</summary>
+        public string Name { get; set; }
     }
 
     /// <summary>Validator kiểm tra dữ liệu cho đối tượng HrmEmployees</summary>
