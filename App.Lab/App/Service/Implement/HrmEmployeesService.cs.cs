@@ -6,10 +6,12 @@ using App.Lab.Model;
 using App.Lab.Repository.Interface;
 using App.Lab.Service.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.VisualStudio.Services.Common.CommandLine;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +44,54 @@ namespace App.Lab.App.Service.Implement
             return _repo.GetListCbx(FkCompanyID);
         }
 
+
+        public static void SetFilterPropertyFromOption(object filter, Lab.Model.SearchOption option)
+        {
+            if (filter == null || option == null || string.IsNullOrWhiteSpace(option.Key))
+                return;
+
+            var type = filter.GetType();
+            var prop = type.GetProperty(option.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+
+            if (prop != null && prop.CanWrite)
+            {
+                try
+                {
+                    string rawValue = option.Value?.Trim();
+
+                    Type targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                    object convertedValue = null;
+
+                    if (targetType == typeof(string))
+                    {
+                        convertedValue = rawValue;
+                    }
+                    else if (targetType.IsEnum)
+                    {
+                        convertedValue = Enum.Parse(targetType, rawValue, ignoreCase: true);
+                    }
+                    
+                    else if (targetType == typeof(DateTime))
+                    {
+                        convertedValue = DateTime.Parse(rawValue);
+                    }
+                    else
+                    {
+                        // Các kiểu phổ biến: int, long, bool, double, ...
+                        convertedValue = Convert.ChangeType(rawValue, targetType);
+                    }
+
+                    prop.SetValue(filter, convertedValue);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Không thể gán {option.Key} = {option.Value}: {ex.Message}");
+                }
+            }
+        }
+
+
+
         /// <summary>Service Lấy danh sách lái xe theo điều kiện và theo Paging </summary>
         /// <param name="filter">HrmEmployeesFilter: bộ lọc để lấy dữ liệu</param>
         /// Author: thuanbv
@@ -49,20 +99,8 @@ namespace App.Lab.App.Service.Implement
         /// Modified: date - user - description
         public PagingResult<HrmEmployees> GetPagingToEdit(HrmEmployeesFilter filter)
         {
-            if (string.IsNullOrEmpty(filter.Option.Key) || string.IsNullOrEmpty(filter.Option.Value))
-            {
-                filter.DisplayName = "";
-                filter.DriverLicense = "";
-            }
-            else if (string.Equals(filter.Option.Key.ToLower(), "DisplayName".ToLower()))
-            {
-                filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
-            }
-            else
-            {
-                filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
-            }
-                return _repo.GetPagingToEdit(filter);
+            SetFilterPropertyFromOption(filter, filter.Option);
+            return _repo.GetPagingToEdit(filter);
         }
 
         /// <summary>Service hàm cập nhât danh sách thông tin của lái xe </summary>
@@ -88,12 +126,30 @@ namespace App.Lab.App.Service.Implement
 
                 var existingIds =  _repo.GetExistingEmployeeIds(employeeIds);
 
+                // Lấy tất cả các phần tử trong employeeIds mà không tồn tại trong existingIds.
                 var invalidIds = employeeIds.Except(existingIds);
 
                 if (invalidIds.Any())
                 {
                     return ServiceStatus.Failure($"Lỗi: Các PkEmployeeId sau không tồn tại trong cơ sở dữ liệu: {string.Join(", ", invalidIds)}");
                 }
+
+    
+                // lấy ra danh sách tên từ items
+                var listName = items.Select(x => x.DisplayName);
+                // lấy ra danh sách giấy phép lái xe từ items
+                var listDriverLicense = items.Select(x => x.DriverLicense);
+
+                var listDuplicate = _repo.GetCheckExistingEmployeeByNameAndDriverLicense(listName, listDriverLicense);
+
+                // Lấy tất cả các phần tử trong employeeIds mà không tồn tại trong listDuplicate.
+                var listIdsDuplicate = listDuplicate.Select(x => x.PkEmployeeId).Except(employeeIds);
+
+                if (listIdsDuplicate.Any())
+                {
+                    return ServiceStatus.Failure($"Lỗi: Đã tồn tại name - DriverLicense  trong cơ sở dữ liệu: {string.Join(", ", listIdsDuplicate)}");
+                }
+
 
                 using (_uow.BeginTransaction())
                 {
@@ -154,34 +210,21 @@ namespace App.Lab.App.Service.Implement
                 {
                     var ws = package.Workbook.Worksheets.Add("DATA");
 
-                    if (string.IsNullOrEmpty(filter.Option.Key) || string.IsNullOrEmpty(filter.Option.Value))
-                    {
-                        filter.DisplayName = "";
-                        filter.DriverLicense = "";
-                    }
-                    else if (string.Equals(filter.Option.Key.ToLower(), "DisplayName".ToLower()))
-                    {
-                        filter.DisplayName = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
-                    }
-                    else
-                    {
-                        filter.DriverLicense = StringHepler.RemoveDiacriticsToUpper(filter.Option.Value);
-                    }
-
-         
+                    SetFilterPropertyFromOption(filter, filter.Option);
+                    
+                    string title = "THÔNG TIN LÁI XE";
                     // lay du lieu
+
                     var listData = _repo.GetDataToExcel(filter);
-                    string title = string.Empty;
 
+                    // lưu danh sách bộ lọc
                     var listFilter = new List<Lab.Model.SearchOption>() { };
-
-                    title = "THÔNG TIN LÁI XE";
 
                     if (!string.IsNullOrEmpty(filter.Option.Value))
                     {
                         listFilter.Add(new Lab.Model.SearchOption
                         {
-                            Key = filter.Option.Key == "displayName" ? "Tên lái xe" : "GPLX",
+                            Key = filter.Option.Name,
                             Value = filter.Option.Value
                         });
                     }

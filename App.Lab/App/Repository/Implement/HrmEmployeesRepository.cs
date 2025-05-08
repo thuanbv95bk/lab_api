@@ -67,6 +67,7 @@ namespace App.Lab.Repository.Implement
                     ",A.IssueLicensePlace" +
                     ",B.Name AS LicenseTypeName " +
                     ",A.LicenseType AS LicenseType " +
+                    ",CASE WHEN A.ExpireLicenseDate >= GETDATE() THEN N'Còn hiệu lực' WHEN A.ExpireLicenseDate <= GETDATE() THEN N'Đã hết hạn' ELSE '' END ActiveValue" +
                     ",COUNT(*) OVER () AS TotalCount " +
                 "FROM dbo.[HRM.Employees] A " +
                 "LEFT JOIN dbo.[BCA.LicenseTypes] B ON A.LicenseType = B.PK_LicenseTypeID " +
@@ -74,6 +75,7 @@ namespace App.Lab.Repository.Implement
                       "AND ISNULL(A.IsDeleted, 0) = 0 " +
                       "AND ISNULL(A.IsLocked, 0) = 0 " +
                       "AND (@Name IS NULL OR A.Name LIKE '%' + @Name + '%') " +
+                      "AND (@IssueLicensePlace IS NULL OR A.IssueLicensePlace LIKE '%' + @IssueLicensePlace + '%') " +
                       "AND (@DriverLicense IS NULL OR A.DriverLicense LIKE '%' + @DriverLicense + '%') " +
                       "AND (@ListStringLicenseTypesId IS NULL OR A.LicenseType IN (SELECT value FROM STRING_SPLIT(@ListStringLicenseTypesId, ','))) " +
                       "AND (@ListStringEmployeesId IS NULL OR A.PK_EmployeeID IN (SELECT value FROM STRING_SPLIT(@ListStringEmployeesId, ','))) ");
@@ -111,6 +113,7 @@ namespace App.Lab.Repository.Implement
                     FK_CompanyID = filter.FkCompanyId,
                     Name = filter.DisplayName?.Trim(),
                     DriverLicense = filter.DriverLicense?.Trim(),
+                    IssueLicensePlace = filter.IssueLicensePlace?.Trim(),
                     ListStringLicenseTypesId = filter.ListStringLicenseTypesId,
                     ListStringEmployeesId = filter.ListStringEmployeesId,
 
@@ -144,6 +147,7 @@ namespace App.Lab.Repository.Implement
                     FK_CompanyID = filter.FkCompanyId,
                     Name = filter.DisplayName?.Trim(),
                     DriverLicense = filter.DriverLicense?.Trim(),
+                    IssueLicensePlace = filter.IssueLicensePlace?.Trim(),
                     ListStringLicenseTypesId = filter.ListStringLicenseTypesId,
                     ListStringEmployeesId = filter.ListStringEmployeesId,
                 }
@@ -250,7 +254,7 @@ namespace App.Lab.Repository.Implement
             var query =
                 "SELECT PK_EmployeeID " +
                 "FROM [HRM.Employees] " +
-                "WHERE PK_EmployeeID IN (" + idsString + ") " +
+                "WHERE PK_EmployeeID IN (SELECT value FROM STRING_SPLIT(@idsString, ',')) " +
                 "AND ISNULL(IsDeleted, 0) = 0 " +
                 "AND FK_CompanyId = 15076 " +
                 "AND ISNULL(IsLocked, 0) = 0;";
@@ -258,6 +262,54 @@ namespace App.Lab.Repository.Implement
             // Thực thi truy vấn và trả về danh sách các ID tồn tại
             var existingIds = ExecuteReader<int>(query, CommandType.Text);
         
+            return existingIds;
+        }
+
+        /// <summary>Kiểm tra sự tồn tại của danh sách theo tên và giấy phép lái xe trong cơ sở dữ liệu </summary>
+        /// Author: thuanbv
+        /// Created: 08/05/2025
+        /// Modified: date - user - description
+        public List<HrmEmployees> GetCheckExistingEmployeeByNameAndDriverLicense(IEnumerable<string> listName, IEnumerable<string> listDriverLicense)
+        {
+            if (listName == null && listDriverLicense == null)
+            {
+                return new List<HrmEmployees>();
+            }
+
+            // Chuyển danh sách listName thành chuỗi để sử dụng trong câu lệnh SQL
+            string listNameString = "";
+            if (listName != null &&listName.Any())
+            {
+                listNameString = string.Join(",", listName);
+            }
+
+            // Chuyển danh sách listDriverLicense thành chuỗi để sử dụng trong câu lệnh SQL
+            string listDriverLicenseString = "";
+
+            if (listName != null && listName.Any())
+            {
+                listDriverLicenseString = string.Join(",", listDriverLicense);
+            }
+
+            // Câu lệnh SQL để kiểm tra sự tồn tại
+            var query =
+                "SELECT PK_EmployeeID AS PkEmployeeID " +
+                    ",LTRIM(DisplayName) as DisplayName " +
+                    ",DriverLicense as DriverLicense " +
+                "FROM dbo.[HRM.Employees]  " +
+                "WHERE " +
+                      "(@listNameString IS NULL OR Name IN (SELECT value FROM STRING_SPLIT(@listNameString, ','))) " +
+                      "AND (@listDriverLicenseString IS NULL OR DriverLicense IN (SELECT value FROM STRING_SPLIT(@listDriverLicenseString, ',')))";
+
+            // Thực thi truy vấn và trả về danh sách các ID tồn tại
+            var existingIds = ExecuteReader<HrmEmployees>(query, CommandType.Text,
+            new
+            {
+                listNameString = listNameString,
+                listDriverLicenseString = listDriverLicenseString,
+
+            });
+
             return existingIds;
         }
     }
