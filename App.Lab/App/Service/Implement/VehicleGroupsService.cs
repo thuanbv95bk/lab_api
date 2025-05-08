@@ -19,7 +19,7 @@ namespace App.Lab.App.Service.Implement
     public class VehicleGroupsService : BaseService<IVehicleGroupsRepository>, IVehicleGroupsService
     {
         private readonly IUnitOfWork _uow;
-        private readonly IAdminUserVehicleGroupService _IAdminUserVehicleGroupService;
+
         private readonly IAdminUserVehicleGroupRepository _IAdminUserVehicleGroupRepository;
 
         public VehicleGroupsService(
@@ -31,7 +31,7 @@ namespace App.Lab.App.Service.Implement
         ) : base(accessor, repo)
         {
             _uow = uow;
-            _IAdminUserVehicleGroupService = IAdminUserVehicleGroupService;
+
             _IAdminUserVehicleGroupRepository = IAdminUserVehicleGroupRepository;
         }
 

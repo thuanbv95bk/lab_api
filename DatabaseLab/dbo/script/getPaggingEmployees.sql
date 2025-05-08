@@ -9,7 +9,7 @@
 
 DECLARE @FK_CompanyID INT = 15076;
 -- Tên
-DECLARE @Name NVARCHAR(100) = N'DAO XUAN TRUONG';
+DECLARE @Name NVARCHAR(100) = N'';
 
 -- Giấy phép lái xe
 DECLARE @DriverLicense NVARCHAR(32) = N'';

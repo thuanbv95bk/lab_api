@@ -61,7 +61,7 @@ namespace App.Lab.Repository.Implement
                     ",CASE WHEN A.UpdatedDate IS NULL THEN A.CreatedDate ELSE A.UpdatedDate END [UpdatedDate]" +
                     ",LTRIM(DisplayName) as DisplayName" +
                     ",A.Mobile" +
-                    ",A.DriverLicense" +
+                    ",A.DriverLicense as DriverLicense" +
                     ",A.IssueLicenseDate" +
                     ",A.ExpireLicenseDate" +
                     ",A.IssueLicensePlace" +
@@ -81,7 +81,7 @@ namespace App.Lab.Repository.Implement
             if (includePaging)
             {
                 query.Append(
-                    "ORDER BY A.DisplayName, A.DriverLicense " +
+                    "ORDER BY DisplayName, DriverLicense " +
                     "OFFSET @pageSize * @pageIndex ROWS FETCH NEXT @pageSize ROWS ONLY;");
             }
             else
@@ -250,13 +250,19 @@ namespace App.Lab.Repository.Implement
             var query =
                 "SELECT PK_EmployeeID " +
                 "FROM [HRM.Employees] " +
-                "WHERE PK_EmployeeID IN (" + idsString + ") " +
+                "WHERE PK_EmployeeID IN (@idsString) " +
                 "AND ISNULL(IsDeleted, 0) = 0 " +
-                "AND FK_CompanyId = 15076 " +
+                "AND FK_CompanyId = @FK_CompanyID " +
                 "AND ISNULL(IsLocked, 0) = 0;";
 
             // Thực thi truy vấn và trả về danh sách các ID tồn tại
-            var existingIds = ExecuteReader<int>(query, CommandType.Text);
+            var existingIds = ExecuteReader<int>(query, CommandType.Text,
+            new
+            {
+                idsString = idsString,
+                FK_CompanyID = 15076,
+
+            });
 
             return existingIds;
         }
