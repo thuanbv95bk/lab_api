@@ -99,7 +99,7 @@ namespace App.Admin.Controllers
                 }
 
                 var ret = await _service.AddOrEditListAsync(items);
-                return ret.IsSuccess ? Success() : Failure(ret.ErroMessage);
+                return ret.IsSuccess ? Success() : Failure(ret.ErroMessage,ret.Data);
             }
             catch (Exception ex)
             {

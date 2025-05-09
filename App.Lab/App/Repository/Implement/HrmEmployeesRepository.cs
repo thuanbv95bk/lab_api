@@ -284,7 +284,7 @@ namespace App.Lab.Repository.Implement
 
             // Câu lệnh SQL để kiểm tra sự tồn tại
             var query =
-                "SELECT E.DisplayName, E.DriverLicense, E.PK_EmployeeID " +
+                "SELECT E.DisplayName, E.DriverLicense, E.PK_EmployeeID as PkEmployeeID " +
                 "FROM dbo.[HRM.Employees] E " +
                 "JOIN (" +
                 "SELECT  N.[value] AS Name, L.[value] AS DriverLicense, CAST(i.[value] AS INT) AS ExcludedId " +
