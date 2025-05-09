@@ -153,7 +153,7 @@ namespace App.Lab.App.Service.Implement
 
                 if (listDuplicate.Any())
                 {
-                    return ServiceStatus.Failure($"Lỗi: Đã tồn tại name - DriverLicense  trong cơ sở dữ liệu:");
+                    return ServiceStatus.Failure("Tồn tại dòng dữ liệu bị trùng Tên - Giấy phép lái xe",listDuplicate);
                 }
 
 
