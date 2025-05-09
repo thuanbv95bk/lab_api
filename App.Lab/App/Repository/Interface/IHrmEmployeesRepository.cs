@@ -66,6 +66,6 @@ namespace App.Lab.Repository.Interface
         /// Author: thuanbv
         /// Created: 08/05/2025
         /// Modified: date - user - description
-        List<HrmEmployees> GetCheckExistingEmployeeByNameAndDriverLicense(IEnumerable<string> listName, IEnumerable<string> listDriverLicense);
+        List<HrmEmployees> GetCheckExistingEmployeeByNameAndDriverLicense(string jsonIds, string jsonNames, string jsonLicenses);
     }
 }

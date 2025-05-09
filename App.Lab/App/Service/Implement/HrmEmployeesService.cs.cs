@@ -14,7 +14,9 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using static Azure.Core.HttpHeader;
 
 namespace App.Lab.App.Service.Implement
 {
@@ -134,20 +136,24 @@ namespace App.Lab.App.Service.Implement
                     return ServiceStatus.Failure($"Lỗi: Các PkEmployeeId sau không tồn tại trong cơ sở dữ liệu: {string.Join(", ", invalidIds)}");
                 }
 
-    
+
                 // lấy ra danh sách tên từ items
+
                 var listName = items.Select(x => x.DisplayName);
                 // lấy ra danh sách giấy phép lái xe từ items
                 var listDriverLicense = items.Select(x => x.DriverLicense);
 
-                var listDuplicate = _repo.GetCheckExistingEmployeeByNameAndDriverLicense(listName, listDriverLicense);
+                // Chuyển sang chuổi có cấu trúc JSON
 
-                // Lấy tất cả các phần tử trong employeeIds mà không tồn tại trong listDuplicate.
-                var listIdsDuplicate = listDuplicate.Select(x => x.PkEmployeeId).Except(employeeIds);
+                string jsonIds = JsonSerializer.Serialize(employeeIds);
+                string jsonNames = JsonSerializer.Serialize(listName);
+                string jsonLicenses = JsonSerializer.Serialize(listDriverLicense);
 
-                if (listIdsDuplicate.Any())
+                var listDuplicate = _repo.GetCheckExistingEmployeeByNameAndDriverLicense(jsonIds, jsonNames, jsonLicenses);
+
+                if (listDuplicate.Any())
                 {
-                    return ServiceStatus.Failure($"Lỗi: Đã tồn tại name - DriverLicense  trong cơ sở dữ liệu: {string.Join(", ", listIdsDuplicate)}");
+                    return ServiceStatus.Failure($"Lỗi: Đã tồn tại name - DriverLicense  trong cơ sở dữ liệu:");
                 }
 
 

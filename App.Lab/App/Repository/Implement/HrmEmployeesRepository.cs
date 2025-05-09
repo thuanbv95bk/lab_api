@@ -67,7 +67,7 @@ namespace App.Lab.Repository.Implement
                     ",A.IssueLicensePlace" +
                     ",B.Name AS LicenseTypeName " +
                     ",A.LicenseType AS LicenseType " +
-                    ",CASE WHEN A.ExpireLicenseDate >= GETDATE() THEN N'Còn hiệu lực' WHEN A.ExpireLicenseDate <= GETDATE() THEN N'Đã hết hạn' ELSE '' END ActiveValue" +
+                    ",CASE WHEN convert(date, A.ExpireLicenseDate) >= convert(date, GETDATE())  THEN N'Còn hiệu lực' WHEN convert(date, A.ExpireLicenseDate) <= convert(date, GETDATE())  THEN N'Đã hết hạn' ELSE '' END ActiveValue" +
                     ",COUNT(*) OVER () AS TotalCount " +
                 "FROM dbo.[HRM.Employees] A " +
                 "LEFT JOIN dbo.[BCA.LicenseTypes] B ON A.LicenseType = B.PK_LicenseTypeID " +
@@ -260,8 +260,14 @@ namespace App.Lab.Repository.Implement
                 "AND ISNULL(IsLocked, 0) = 0;";
         
             // Thực thi truy vấn và trả về danh sách các ID tồn tại
-            var existingIds = ExecuteReader<int>(query, CommandType.Text);
-        
+            var existingIds = ExecuteReader<int>(query, CommandType.Text,
+            new
+            {
+                idsString = idsString,
+                
+
+            });
+
             return existingIds;
         }
 
@@ -269,44 +275,34 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 08/05/2025
         /// Modified: date - user - description
-        public List<HrmEmployees> GetCheckExistingEmployeeByNameAndDriverLicense(IEnumerable<string> listName, IEnumerable<string> listDriverLicense)
+        public List<HrmEmployees> GetCheckExistingEmployeeByNameAndDriverLicense(string jsonIds, string jsonNames, string jsonLicenses)
         {
-            if (listName == null && listDriverLicense == null)
+            if (string.IsNullOrEmpty(jsonNames) && string.IsNullOrEmpty(jsonLicenses))
             {
                 return new List<HrmEmployees>();
             }
 
-            // Chuyển danh sách listName thành chuỗi để sử dụng trong câu lệnh SQL
-            string listNameString = "";
-            if (listName != null &&listName.Any())
-            {
-                listNameString = string.Join(",", listName);
-            }
-
-            // Chuyển danh sách listDriverLicense thành chuỗi để sử dụng trong câu lệnh SQL
-            string listDriverLicenseString = "";
-
-            if (listName != null && listName.Any())
-            {
-                listDriverLicenseString = string.Join(",", listDriverLicense);
-            }
-
             // Câu lệnh SQL để kiểm tra sự tồn tại
             var query =
-                "SELECT PK_EmployeeID AS PkEmployeeID " +
-                    ",LTRIM(DisplayName) as DisplayName " +
-                    ",DriverLicense as DriverLicense " +
-                "FROM dbo.[HRM.Employees]  " +
-                "WHERE " +
-                      "(@listNameString IS NULL OR Name IN (SELECT value FROM STRING_SPLIT(@listNameString, ','))) " +
-                      "AND (@listDriverLicenseString IS NULL OR DriverLicense IN (SELECT value FROM STRING_SPLIT(@listDriverLicenseString, ',')))";
+                "SELECT E.DisplayName, E.DriverLicense, E.PK_EmployeeID " +
+                "FROM dbo.[HRM.Employees] E " +
+                "JOIN (" +
+                "SELECT  N.[value] AS Name, L.[value] AS DriverLicense, CAST(i.[value] AS INT) AS ExcludedId " +
+                "FROM OPENJSON(@jsonNames) AS N " +
+                "JOIN OPENJSON(@jsonLicenses) AS L ON N.[key] = L.[key] " +
+                "JOIN OPENJSON(@jsonIds) AS I ON N.[key] = I.[key] ) " +
+                "AS Pairs ON E.Name = Pairs.Name " +
+                "AND E.DriverLicense = Pairs.DriverLicense " +
+                "AND E.PK_EmployeeID != Pairs.ExcludedId; ";
+
 
             // Thực thi truy vấn và trả về danh sách các ID tồn tại
             var existingIds = ExecuteReader<HrmEmployees>(query, CommandType.Text,
             new
             {
-                listNameString = listNameString,
-                listDriverLicenseString = listDriverLicenseString,
+                jsonIds = jsonIds,
+                jsonNames = jsonNames,
+                jsonLicenses = jsonLicenses
 
             });
 
