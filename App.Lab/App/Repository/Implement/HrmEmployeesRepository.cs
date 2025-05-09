@@ -88,7 +88,7 @@ namespace App.Lab.Repository.Implement
             }
             else
             {
-                query.Append("ORDER BY A.DisplayName, A.DriverLicense");
+                query.Append("ORDER BY DisplayName, DriverLicense");
             }
 
             return query.ToString();
