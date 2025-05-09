@@ -5,23 +5,34 @@
 -- Description: 
 -- =============================================
 
-DECLARE @ListStringEmployeesName NVARCHAR(50) = N'01:54,00,BAN VAN THUONG,BUI NGOC DUONG';
-DECLARE @ListStringDriverLicenseName NVARCHAR(50) = N'105.893379,00,3400473404785';
-SELECT LTRIM(DisplayName) AS DisplayName,
+
+SELECT PK_EmployeeID,
+       DisplayName,
        DriverLicense
 FROM dbo.[HRM.Employees]
-WHERE (
-          ISNULL(@ListStringEmployeesName, '') = ''
-          OR Name IN
-             (
-                 SELECT value FROM STRING_SPLIT(@ListStringEmployeesName, ',')
-             )
-      )
-      AND
-      (
-          ISNULL(@ListStringDriverLicenseName, '') = ''
-          OR DriverLicense IN
-             (
-                 SELECT value FROM STRING_SPLIT(@ListStringDriverLicenseName, ',')
-             )
-      );
+ORDER BY DisplayName,
+         DriverLicense;
+GO
+
+DECLARE @jsonIds NVARCHAR(MAX) = N'[455400]';
+DECLARE @jsonNames NVARCHAR(MAX) = N'["310100008359"]';
+DECLARE @jsonLicenses NVARCHAR(MAX) = N'["VUVANHAI"]';
+
+-- Lấy các cặp Name - License - Id theo chỉ số (index = key)
+SELECT E.DisplayName, E.DriverLicense, E.PK_EmployeeID
+FROM dbo.[HRM.Employees] E
+JOIN (
+    SELECT 
+        N.[value] AS Name, 
+        L.[value] AS DriverLicense,
+        CAST(i.[value] AS INT) AS ExcludedId
+    FROM OPENJSON(@jsonNames) AS N
+    JOIN OPENJSON(@jsonLicenses) AS L ON N.[key] = L.[key]
+    JOIN OPENJSON(@jsonIds) AS I ON N.[key] = I.[key]
+) AS Pairs
+    ON E.Name = Pairs.Name 
+    AND E.DriverLicense = Pairs.DriverLicense
+    AND E.PK_EmployeeID != Pairs.ExcludedId;
+
+
+
