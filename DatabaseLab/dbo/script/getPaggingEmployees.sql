@@ -81,5 +81,11 @@ WHERE FK_CompanyID = @FK_CompanyID
                  SELECT value FROM STRING_SPLIT(@ListStringEmployeesId, ',')
              )
       )
+	   AND
+	        (
+	            ISNULL(@DriverLicense, '') = ''
+	            OR DriverLicense LIKE '%' + @DriverLicense + '%'
+	        )
 ORDER BY DisplayName OFFSET @pageSize * (@pageIndex - 1) ROWS --Bỏ qua một số lượng dòng nhất định.
 FETCH NEXT @pageSize ROWS ONLY; --Lấy tiếp số dòng bằng với @pageSize
+

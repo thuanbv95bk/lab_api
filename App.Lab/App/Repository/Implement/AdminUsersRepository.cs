@@ -25,7 +25,7 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
-        public List<Users> GetList(Users filter)
+        public async Task<List<Users>> GetListAsync(Users filter)
         {
 
             var listOrderOption = new OrderOption[] {
@@ -34,7 +34,7 @@ namespace App.Lab.Repository.Implement
                 OrderType = "ASC",
             }};
             var listFilter = MapFilterToOptions(filter);
-            this.GetTableData
+             this.GetTableData
             (
                 out List<Users> ret
                 , "Users", null, listFilter, listOrderOption

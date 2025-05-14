@@ -10,7 +10,7 @@
         public string ErroMessage { get; private set; }
         public object Data { get; private set; }
 
-        private ServiceStatus() { }
+
 
         /// <summary>Successes the specified data.</summary>
         /// <param name="Data">The data.</param>

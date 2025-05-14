@@ -41,12 +41,15 @@ namespace App.Lab.App.Service.Implement
         /// Author: thuanbv
         /// Created: 24/04/2025
         /// Modified: date - user - description
-        public List<HrmEmployeesCbx> GetListCbx(int FkCompanyID)
+        public async Task<List<HrmEmployeesCbx>> GetListCbxAsync(int FkCompanyID)
         {
-            return _repo.GetListCbx(FkCompanyID);
+            return await _repo.GetListCbxAsync(FkCompanyID);
         }
 
-
+        /// <summary>ham mapping filter với option  </summary>
+        /// Author: thuanbv
+        /// Created: 25/04/2025
+        /// Modified: date - user - description
         public static void SetFilterPropertyFromOption(object filter, Lab.Model.SearchOption option)
         {
             if (filter == null || option == null || string.IsNullOrWhiteSpace(option.Key))
@@ -59,28 +62,36 @@ namespace App.Lab.App.Service.Implement
             {
                 try
                 {
-                    string rawValue = option.Value?.Trim();
-
+                    string? rawValue = option.Value?.Trim();
                     Type targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
-                    object convertedValue = null;
+                    object? convertedValue = null;
 
                     if (targetType == typeof(string))
                     {
-                        convertedValue = rawValue;
+                        convertedValue = rawValue ?? string.Empty;
                     }
                     else if (targetType.IsEnum)
                     {
-                        convertedValue = Enum.Parse(targetType, rawValue, ignoreCase: true);
+                        if (rawValue != null)
+                        {
+                            convertedValue = Enum.Parse(targetType, rawValue, ignoreCase: true);
+                        }
                     }
                     
                     else if (targetType == typeof(DateTime))
                     {
-                        convertedValue = DateTime.Parse(rawValue);
+                        if (rawValue != null)
+                        {
+                            convertedValue = DateTime.Parse(rawValue);
+                        }
                     }
                     else
                     {
                         // Các kiểu phổ biến: int, long, bool, double, ...
-                        convertedValue = Convert.ChangeType(rawValue, targetType);
+                        if (rawValue != null)
+                        {
+                            convertedValue = Convert.ChangeType(rawValue, targetType);
+                        }
                     }
 
                     prop.SetValue(filter, convertedValue);
@@ -99,10 +110,10 @@ namespace App.Lab.App.Service.Implement
         /// Author: thuanbv
         /// Created: 25/04/2025
         /// Modified: date - user - description
-        public PagingResult<HrmEmployees> GetPagingToEdit(HrmEmployeesFilter filter)
+        public async Task<PagingResult<HrmEmployees>> GetPagingToEditAsync(HrmEmployeesFilter filter)
         {
             SetFilterPropertyFromOption(filter, filter.Option);
-            return _repo.GetPagingToEdit(filter);
+            return await _repo.GetPagingToEditAsync(filter);
         }
 
         /// <summary>Service hàm cập nhât danh sách thông tin của lái xe </summary>
@@ -126,7 +137,7 @@ namespace App.Lab.App.Service.Implement
                 // Kiểm tra sự tồn tại của các PkEmployeeId trong cơ sở dữ liệu
                 if (!employeeIds.Any()) return ServiceStatus.Failure("Danh sách trống!");
 
-                var existingIds =  _repo.GetExistingEmployeeIds(employeeIds);
+                var existingIds =  await _repo.GetExistingEmployeeIdsAsync(employeeIds);
 
                 // Lấy tất cả các phần tử trong employeeIds mà không tồn tại trong existingIds.
                 var invalidIds = employeeIds.Except(existingIds);
@@ -149,7 +160,7 @@ namespace App.Lab.App.Service.Implement
                 string jsonNames = JsonSerializer.Serialize(listName);
                 string jsonLicenses = JsonSerializer.Serialize(listDriverLicense);
 
-                var listDuplicate = _repo.GetCheckExistingEmployeeByNameAndDriverLicense(jsonIds, jsonNames, jsonLicenses);
+                var listDuplicate = await _repo.GetCheckExistingEmployeeByNameAndDriverLicenseAsync(jsonIds, jsonNames, jsonLicenses);
 
                 if (listDuplicate.Any())
                 {
@@ -163,7 +174,7 @@ namespace App.Lab.App.Service.Implement
                     {
                         if (item.PkEmployeeId > 0)
                         {
-                            await _repo.Update(item);
+                            await _repo.UpdateAsync(item);
                         }
                     }
 
@@ -189,7 +200,7 @@ namespace App.Lab.App.Service.Implement
             {
                 using (_uow.BeginTransaction())
                 {
-                    await _repo.DeleteSoft(employeeId);
+                    await _repo.DeleteSoftAsync(employeeId);
                     _uow.SaveChanges();
                     return ServiceStatus.Success("Xóa thành công");
                 }
@@ -206,7 +217,7 @@ namespace App.Lab.App.Service.Implement
         /// Author: thuanbv
         /// Created: 29/04/2025
         /// Modified: date - user - description
-        public MemoryStream ExportExcel(HrmEmployeesFilterExcel filter)
+        public async Task<MemoryStream> ExportExcelAsync(HrmEmployeesFilterExcel filter)
         {
             try
             {
@@ -221,12 +232,12 @@ namespace App.Lab.App.Service.Implement
                     string title = "THÔNG TIN LÁI XE";
                     // lay du lieu
 
-                    var listData = _repo.GetDataToExcel(filter);
+                    var listData = await _repo.GetDataToExcelAsync(filter);
 
                     // lưu danh sách bộ lọc
                     var listFilter = new List<Lab.Model.SearchOption>() { };
 
-                    if (!string.IsNullOrEmpty(filter.Option.Value))
+                    if (!string.IsNullOrEmpty(filter.Option.Value)) 
                     {
                         listFilter.Add(new Lab.Model.SearchOption
                         {
@@ -253,7 +264,7 @@ namespace App.Lab.App.Service.Implement
                     }
                     
               
-                    EmployessReportExcel.FillExcell(ws, title, listFilter, 1, listData, EmployessReportExcel.HeaderRows());
+                     EmployessReportExcel.FillExcell(ws, title, listFilter, 1, listData, EmployessReportExcel.HeaderRows());
 
                     stream = new MemoryStream(package.GetAsByteArray());
                 }

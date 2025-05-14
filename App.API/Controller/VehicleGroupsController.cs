@@ -13,6 +13,7 @@ namespace App.Admin.Controllers
     /// Author: thuanbv
     /// Created: 29/04/2025
     /// Modified: date - user - description
+    /// 
     public class VehicleGroupsController : BaseController
     {
         private readonly IVehicleGroupsService _service;
@@ -21,8 +22,7 @@ namespace App.Admin.Controllers
         {
             _service = service;
         }
-
-
+        
         /// <summary>Danh sách các nhóm chưa được gán theo user</summary>
         /// <param name="filter">Bộ lọc nhóm phương tiện</param>
         /// Author: thuanbv
@@ -39,7 +39,6 @@ namespace App.Admin.Controllers
             }
             var ret = _service.GetListUnassignGroups(filter);
             return ret.IsSuccess ? Success(ret.Data) : Failure(ret.ErroMessage);
-
         }
 
     }

@@ -94,7 +94,7 @@ namespace App.Lab.Service.Implement
                         if (dbDeletedDict.TryGetValue(key, out var deletedItem))
                         {
                             // Phục hồi từ xóa mềm
-                            await _repo.Update(new AdminUserVehicleGroup
+                            await _repo.UpdateAsync(new AdminUserVehicleGroup
                             {
                                 UpdatedDate = now,
                                 IsDeleted = false,
@@ -106,7 +106,7 @@ namespace App.Lab.Service.Implement
                         else
                         {
                             // Thêm mới
-                            await _repo.Create(new AdminUserVehicleGroup
+                            await _repo.CreateAsync(new AdminUserVehicleGroup
                             {
                                 CreatedDate = now,
                                 IsDeleted = null,
@@ -125,7 +125,7 @@ namespace App.Lab.Service.Implement
 
                         if (!inputKeys.Contains(key))
                         {
-                            await _repo.DeleteSoft(new AdminUserVehicleGroup
+                            await _repo.DeleteSoftAsync(new AdminUserVehicleGroup
                             {
                                 UpdatedDate = now,
                                 IsDeleted = true,
@@ -152,13 +152,13 @@ namespace App.Lab.Service.Implement
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
-        public ServiceStatus GetListAssignGroups(AdminUserVehicleGroupFilter filter)
+        public async Task<ServiceStatus> GetListAssignGroupsAsync(AdminUserVehicleGroupFilter filter)
         {
             try
             {
                 var listFlatten = new List<VehicleGroups>();
 
-                var listAssignGroups = _repo.GetListView(filter);
+                var listAssignGroups = await _repo.GetListViewAsync(filter);
                 if (listAssignGroups == null)
                     return ServiceStatus.Success(listFlatten);
 

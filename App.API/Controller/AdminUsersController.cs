@@ -14,7 +14,6 @@ namespace App.Admin.Controllers
     public class AdminUsersController : BaseController
     {
         private readonly IAdminUsersService _service;
-
         public AdminUsersController(IAdminUsersService service)
         {
             _service = service;
@@ -28,13 +27,13 @@ namespace App.Admin.Controllers
         /// Modified: date - user - description
         [HttpPost]
         [Route("get-list")]
-        public IActionResult GetList(Users filter)
+        public async Task<IActionResult> GetList([FromBody] Users filter)
         {
             if (filter == null)
             {
                 return Failure("Phải nhập tiêu chí tìm kiếm");
             }
-            var ret = _service.GetList(filter);
+            var ret = await _service.GetListAsync(filter);
             return Success(ret);
         }
     }

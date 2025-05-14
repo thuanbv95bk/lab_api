@@ -1,16 +1,9 @@
-﻿using App.Common.Helper;
-using App.DataAccess;
+﻿using App.DataAccess;
 using App.Lab.App.Model;
 using App.Lab.Model;
 using App.Lab.Repository.Interface;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace App.Lab.Repository.Implement
 {
@@ -30,7 +23,7 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
-        public Task Create(AdminUserVehicleGroup obj)
+        public async Task CreateAsync(AdminUserVehicleGroup obj)
         {
 
             string sql =
@@ -58,10 +51,10 @@ namespace App.Lab.Repository.Implement
                                "@UpdatedByUser, " +
                                "@IsDeleted" +
                            "); ";
-            return Task.Run(() => this.ExecuteScalar<int>
+            await this.ExecuteScalarAsync<int>
             (
-                sql
-               , CommandType.Text
+              sql
+            , CommandType.Text
                 , new
                 {
                     FK_UserID = obj.FK_UserID,
@@ -74,7 +67,7 @@ namespace App.Lab.Repository.Implement
                     UpdatedByUser = obj.UpdatedByUser,
                     IsDeleted = obj.IsDeleted,
                 }
-            ));
+            );
 
         }
         /// <summary>Cập nhật 1 nhóm phương tiện theo user</summary>
@@ -82,24 +75,24 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 4/22/2025
         /// Modified: date - user - description
-        public Task Update(AdminUserVehicleGroup item)
+        public async Task UpdateAsync(AdminUserVehicleGroup item)
         {
             string sql =
                  "UPDATE [Admin.UserVehicleGroup] SET IsDeleted = 0 , UpdatedDate = @UpdatedDate" +
                          " WHERE FK_UserID = @FK_UserID " +
                          " AND FK_VehicleGroupID = @FK_VehicleGroupID;";
-            return Task.Run(() => this.ExecuteScalar<int>
-            (
-                sql
-               , CommandType.Text
-                , new
-                {
-                    UpdatedDate = item.UpdatedDate,
-                    FK_UserID = item.FK_UserID,
-                    FK_VehicleGroupID = item.FK_VehicleGroupID,
+             await this.ExecuteScalarAsync<int>
+             (
+                 sql
+                , CommandType.Text
+                 , new
+                 {
+                     UpdatedDate = item.UpdatedDate,
+                     FK_UserID = item.FK_UserID,
+                     FK_VehicleGroupID = item.FK_VehicleGroupID,
 
-                }
-            ));
+                 }
+             );
         }
 
 
@@ -108,7 +101,7 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
-        public Task DeleteSoft(AdminUserVehicleGroup item)
+        public async Task DeleteSoftAsync(AdminUserVehicleGroup item)
         {
 
             string sql =
@@ -118,7 +111,7 @@ namespace App.Lab.Repository.Implement
                                                                 "@FK_VehicleGroupID " +
                                                                 " AND ParentVehicleGroupID = @ParentVehicleGroupID;";
 
-            return Task.Run(() => this.ExecuteScalar<int>
+            await this.ExecuteScalarAsync<int>
             (
                 sql
                , CommandType.Text
@@ -130,7 +123,7 @@ namespace App.Lab.Repository.Implement
                     ParentVehicleGroupID = item.ParentVehicleGroupID,
 
                 }
-            ));
+            );
 
         }
 
@@ -164,9 +157,8 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
-        public List<VehicleGroups> GetListView(AdminUserVehicleGroupFilter filter)
+        public async Task<List<VehicleGroups>> GetListViewAsync(AdminUserVehicleGroupFilter filter)
         {
-
             string sql =
                 "SELECT G.* FROM dbo.[Vehicle.Groups] G " +
                     "JOIN dbo.[Admin.UserVehicleGroup] A ON A.FK_VehicleGroupID = G.PK_VehicleGroupID" +
@@ -174,11 +166,15 @@ namespace App.Lab.Repository.Implement
                     "AND ISNULL(G.IsDeleted, 0) = 0 " +
                     "AND ISNULL(A.IsDeleted, 0) = 0;";
 
+           var listItem = await ExecuteReaderAsync<VehicleGroups>
+            (
+                sql,
+                CommandType.Text,
+                new { FK_UserID = filter.FK_UserID }
+            );
 
-            var parameters = this.MapToSqlParameters(filter);
-
-            this.ExecCommand<VehicleGroups>(out var retList, sql, parameters);
-            return retList;
+            return listItem;
+           
         }
 
     }

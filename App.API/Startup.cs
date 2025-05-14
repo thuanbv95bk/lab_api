@@ -27,7 +27,7 @@ public class Startup
 
         // https://www.tutorialsteacher.com/core/dependency-injection-in-aspnet-core
  
-        services.AddControllers(); // 
+        services.AddControllers(); 
 
         App.Lab.Startup.RegisterDependency(services);
         services.AddEndpointsApiExplorer();
@@ -73,8 +73,7 @@ public class Startup
         app.UseAuthorization();
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapControllers();  
-            
+            endpoints.MapControllers();
         });
        
     }

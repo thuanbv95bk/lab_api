@@ -31,9 +31,9 @@ namespace App.Lab.Service.Implement
         /// Author: thuanbv
         /// Created: 24/04/2025
         /// Modified: date - user - description
-        public List<BcaLicenseTypes> GetListActive()
+        public async Task<List<BcaLicenseTypes>> GetListActiveAsync()
         {
-            return _repo.GetListActive();
+            return await _repo.GetListActiveAsync();
         }
     }
 }

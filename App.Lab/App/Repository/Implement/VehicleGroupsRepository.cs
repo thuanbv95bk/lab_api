@@ -7,6 +7,7 @@ using App.Lab.Repository.Interface;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -27,13 +28,17 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
-        public UserVehicleGroupView GetViewById(int PK_VehicleGroupID)
+        public async Task<UserVehicleGroupView> GetViewByIdAsync(int PK_VehicleGroupID)
         {
             string sql = @"select * from [Vehicle.Groups] where PK_VehicleGroupID = @PK_VehicleGroupID";
-            var parameters = this.MapToSqlParameters(new { PK_VehicleGroupID });
+            var item = await ExecuteReaderSingleAsync<UserVehicleGroupView>
+            (
+               sql,
+                CommandType.Text,
+                new { PK_VehicleGroupID = PK_VehicleGroupID }
+            );
 
-            this.ExecCommand<UserVehicleGroupView>(out var retList, sql, parameters);
-            return retList.FirstOrDefault();
+            return item;
         }
 
         /// <summary>Lấy danh sách nhóm phương tiện</summary>

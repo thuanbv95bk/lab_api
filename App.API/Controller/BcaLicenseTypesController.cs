@@ -30,12 +30,11 @@ namespace App.Admin.Controllers
         /// Modified: date - user - description
         [HttpGet]
         [Route("get-list-active")]
-        public IActionResult GetListActive()
+        public async Task<IActionResult> GetListActive()
         {
-
             try
             {
-                var ret = _service.GetListActive();
+                var ret = await _service.GetListActiveAsync();
                 return Success(ret);
             }
             catch (Exception ex)

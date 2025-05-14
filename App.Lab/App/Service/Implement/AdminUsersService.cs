@@ -31,9 +31,10 @@ namespace App.Lab.Service.Implement
         /// Author: thuanbv
         /// Created: 4/22/2025
         /// Modified: date - user - description
-        public List<Users> GetList(Users filter)
+        /// 
+        public async Task<List<Users>> GetListAsync(Users filter)
         {
-            return _repo.GetList(filter);
+            return await _repo.GetListAsync(filter);
         }
     }
 }
