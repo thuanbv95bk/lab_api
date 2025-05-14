@@ -39,8 +39,8 @@ public class Startup
                     o => o.AddPolicy("AllowAngular", builder => builder
                         .AllowAnyMethod()
                         .AllowAnyHeader()
-                        //.AllowCredentials()
-                        //.AllowAnyOrigin()
+                         //.AllowCredentials()
+                        .WithExposedHeaders("Content-Disposition")
                         .WithOrigins(AppConfig.LstFrontEndUrl.ToArray())
                     )
                 );

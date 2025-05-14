@@ -28,9 +28,9 @@ namespace App.Lab.Repository.Implement
         /// Modified: date - user - description
         public async Task<List<HrmEmployeesCbx>> GetListCbxAsync(int FkCompanyID)
         {
-            var listItem = new List<HrmEmployeesCbx>() { };
+           
 
-            listItem = await ExecuteReaderAsync<HrmEmployeesCbx>
+            var listItem = await ExecuteReaderAsync<HrmEmployeesCbx>
             (
                 "SELECT PK_EmployeeID as PkEmployeeID , LTRIM(DisplayName) as DisplayName, DriverLicense " +
                 "FROM [HRM.Employees] " +

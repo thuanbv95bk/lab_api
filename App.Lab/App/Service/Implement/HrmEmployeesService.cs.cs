@@ -17,6 +17,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static Azure.Core.HttpHeader;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace App.Lab.App.Service.Implement
 {
@@ -217,12 +218,18 @@ namespace App.Lab.App.Service.Implement
         /// Author: thuanbv
         /// Created: 29/04/2025
         /// Modified: date - user - description
-        public async Task<MemoryStream> ExportExcelAsync(HrmEmployeesFilterExcel filter)
+        public async Task<MemoryStream?> ExportExcelAsync(HrmEmployeesFilterExcel filter)
         {
             try
             {
+                var listData = await _repo.GetDataToExcelAsync(filter);
+
+                if (listData == null || !listData.Any())
+                    return null;
+
                 MemoryStream stream;
                 ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+
                 using (var package = new ExcelPackage())
                 {
                     var ws = package.Workbook.Worksheets.Add("DATA");
@@ -230,9 +237,6 @@ namespace App.Lab.App.Service.Implement
                     SetFilterPropertyFromOption(filter, filter.Option);
                     
                     string title = "THÔNG TIN LÁI XE";
-                    // lay du lieu
-
-                    var listData = await _repo.GetDataToExcelAsync(filter);
 
                     // lưu danh sách bộ lọc
                     var listFilter = new List<Lab.Model.SearchOption>() { };
@@ -273,7 +277,8 @@ namespace App.Lab.App.Service.Implement
             }
             catch (Exception ex)
             {
-                return new MemoryStream(); 
+                return null;
+                throw;
             }
         }
     }

@@ -40,7 +40,7 @@ namespace App.Admin.Controllers
                 {
                     return Failure("Phải nhập tiêu chí tìm kiếm");
                 }
-                var ret = _service.GetListCbxAsync(FkCompanyID);
+                var ret = await _service.GetListCbxAsync(FkCompanyID);
                 return Success(ret);
             }
             catch (Exception ex)
@@ -160,11 +160,16 @@ namespace App.Admin.Controllers
                     return Failure("Chưa có điều kiện tìm kiếm theo công ty, vui lòng thử lại");
                 }
                 var stream = await _service.ExportExcelAsync(filter);
-                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+                if (stream == null)
+                {
+                    return Failure("Không thể tạo file Excel. Vui lòng thử lại.");
+                }
+                return File(stream,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Danh sách lái xe thuan.xlsx");
             }
             catch (Exception ex)
             {
-                return Failure("Có lỗi xảy ra với hệ thống");
+                return Failure("Có lỗi xảy ra khi tạo file");
             }
             
         }

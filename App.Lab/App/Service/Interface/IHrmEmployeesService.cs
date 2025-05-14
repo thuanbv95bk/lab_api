@@ -53,6 +53,6 @@ namespace App.Lab.Service.Interface
         /// Author: thuanbv
         /// Created: 28/04/2025
         /// Modified: date - user - description
-        Task<MemoryStream> ExportExcelAsync(HrmEmployeesFilterExcel filter);
+        Task<MemoryStream?> ExportExcelAsync(HrmEmployeesFilterExcel filter);
     }
 }
