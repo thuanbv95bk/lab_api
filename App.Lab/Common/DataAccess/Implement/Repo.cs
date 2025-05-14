@@ -1,28 +1,25 @@
 ﻿
-using System.Data;
-using System.Text;
 using App.Common.Helper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
+using System.Data;
+using System.Data.Common;
+using System.Text;
 
 
 namespace App.DataAccess
 {
+
+    /// <summary> Repo phục vụ cho lấy dữ liệu từ database </summary>
+    /// Author: thuanbv
+    /// Created: 14/05/2025
+    /// Modified: date - user - description
     public class Repo : Accessor
     {
         private readonly IUnitOfWork _unitOfWork;
         public string Schema;
 
-        //private static readonly JsonSerializerOptions jsonSerializeroptions = new JsonSerializerOptions
-        //{
-        //    Converters =
-        //{
-        //        new BooleanConverter(),
-        //        new NullableBooleanConverter()
-        //},
-        //    PropertyNameCaseInsensitive = true
-        //};
-
+ 
         public Repo(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -122,6 +119,75 @@ namespace App.DataAccess
 
         }
 
+        /// <summary>Executes the non query with async-await.</summary>
+        /// <param name="commandText">The command text.</param>
+        /// <param name="commandType">Type of the command.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <exception cref="System.Exception"></exception>
+        /// Author: thuanbv
+        /// Created: 23/04/2025
+        /// Modified: date - user - description
+        public async Task<int> ExecuteNonQueryAsync(string commandText, CommandType commandType = CommandType.Text, object parameters = null)
+        {
+            IDbTransaction trans = null;
+
+            try
+            {
+                if (commandType == CommandType.StoredProcedure && !string.IsNullOrEmpty(Schema))
+                {
+                    commandText = $"{Schema}.{commandText}";
+                }
+
+                var connection = _unitOfWork.GetDbContext().Connection;
+
+                if (connection.State != ConnectionState.Open)
+                {
+                    if (connection is DbConnection dbConn)
+                        await dbConn.OpenAsync();
+                    else
+                        connection.Open(); // fallback sync
+                }
+
+                using var cmd = connection.CreateCommand();
+                trans = _unitOfWork.GetTransaction() ?? connection.BeginTransaction();
+                cmd.Transaction = trans;
+                cmd.CommandText = commandText;
+                cmd.CommandType = commandType;
+
+                if (parameters != null)
+                {
+                    AddParameters(cmd, parameters);
+                }
+
+                int affected = cmd is DbCommand dbCmd
+                    ? await dbCmd.ExecuteNonQueryAsync()
+                    : cmd.ExecuteNonQuery(); // fallback sync
+
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans.Commit();
+                }
+
+                return affected;
+            }
+            catch (Exception ex)
+            {
+                if (trans != null && _unitOfWork.GetTransaction() == null)
+                {
+                    trans.Rollback();
+                }
+                throw new Exception(ErrorMessage(ex, commandText, parameters), ex);
+            }
+            finally
+            {
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans?.Dispose();
+                }
+            }
+        }
+
+
         /// <summary>Executes the scalar.</summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="commandText">The command text.</param>
@@ -205,9 +271,248 @@ namespace App.DataAccess
                 }
             }
         }
+        /// <summary>Executes the scalar with async-await.</summary>
+        /// <param name="commandText">The command text.</param>
+        /// <param name="commandType">Type of the command.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <exception cref="System.Exception"></exception>
+        /// Author: thuanbv
+        /// Created: 23/04/2025
+        /// Modified: date - user - description
+
+        public async Task<T?> ExecuteScalarAsync<T>(string commandText, CommandType commandType = CommandType.Text, object parameters = null)
+        {
+            IDbTransaction trans = null;
+            object? result = null;
+
+            try
+            {
+                if (commandType == CommandType.StoredProcedure && !string.IsNullOrEmpty(Schema))
+                {
+                    commandText = $"{Schema}.{commandText}";
+                }
+
+                var connection = _unitOfWork.GetDbContext().Connection;
+
+                if (connection.State != ConnectionState.Open)
+                {
+                    if (connection is DbConnection dbConn)
+                        await dbConn.OpenAsync();
+                    else
+                        connection.Open(); // fallback sync
+                }
+
+                using var cmd = connection.CreateCommand();
+                trans = _unitOfWork.GetTransaction() ?? connection.BeginTransaction();
+                cmd.Transaction = trans;
+                cmd.CommandText = commandText;
+                cmd.CommandType = commandType;
+
+                if (parameters != null)
+                {
+                    AddParameters(cmd, parameters);
+                }
+
+                result = cmd is DbCommand dbCmd
+                    ? await dbCmd.ExecuteScalarAsync()
+                    : cmd.ExecuteScalar(); // fallback sync
+
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans.Commit();
+                }
+
+                if (result == DBNull.Value || result == null)
+                {
+                    return default;
+                }
+
+                return (T)Convert.ChangeType(result, typeof(T));
+            }
+            catch (Exception ex)
+            {
+                if (trans != null && _unitOfWork.GetTransaction() == null)
+                {
+                    trans.Rollback();
+                }
+                throw new Exception(ErrorMessage(ex, commandText, parameters), ex);
+            }
+            finally
+            {
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans?.Dispose();
+                }
+            }
+        }
 
 
-        /// <summary>Executes the reader.</summary>
+        #region ExecuteReader
+
+
+        /// <summary>Executes the reader lấy 1 dòng getbyId.</summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="commandText">The command text.</param>
+        /// <param name="commandType">Type of the command.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <exception cref="System.Exception"></exception>
+        /// Author: thuanbv
+        /// Created: 23/04/2025
+        /// Modified: date - user - description
+        public T ExecuteReaderSingle<T>(string commandText, CommandType commandType = CommandType.Text, object parameters = null)
+        {
+            IDataReader dr = null;
+            IDbTransaction trans = null;
+
+            try
+            {
+                if (commandType == CommandType.StoredProcedure && !string.IsNullOrEmpty(Schema))
+                {
+                    commandText = $"{Schema}.{commandText}";
+                }
+
+                var connection = _unitOfWork.GetDbContext().Connection;
+
+                if (connection.State != ConnectionState.Open)
+                {
+                    connection.Open();
+                }
+
+                var cmd = connection.CreateCommand();
+                cmd.CommandText = commandText;
+                cmd.CommandType = commandType;
+
+                trans = _unitOfWork.GetTransaction() ?? connection.BeginTransaction();
+                cmd.Transaction = trans;
+
+                if (parameters != null)
+                {
+                    AddParameters(cmd, parameters);
+                }
+
+                dr = cmd.ExecuteReader();
+
+                T result = default;
+
+                if (dr.Read())
+                {
+                    result = CBO.FillObject<T>(dr); // ánh xạ 1 dòng → object T
+                }
+
+                dr.Close();
+
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans.Commit();
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (trans != null && _unitOfWork.GetTransaction() == null)
+                {
+                    trans.Rollback();
+                }
+
+                throw new Exception(ErrorMessage(ex, commandText, parameters), ex);
+            }
+            finally
+            {
+                dr?.Dispose();
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans?.Dispose();
+                }
+            }
+        }
+
+        /// <summary> Executes the reader lấy 1 dòng getbyId với async-await .</summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="commandText">The command text.</param>
+        /// <param name="commandType">Type of the command.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <exception cref="System.Exception"></exception>
+        /// Author: thuanbv
+        /// Created: 23/04/2025
+        /// Modified: date - user - description
+        public async Task<T> ExecuteReaderSingleAsync<T>(string commandText, CommandType commandType = CommandType.Text, object parameters = null)
+        {
+            DbDataReader dr = null;
+            IDbTransaction trans = null;
+
+            try
+            {
+                if (commandType == CommandType.StoredProcedure && !string.IsNullOrEmpty(Schema))
+                {
+                    commandText = $"{Schema}.{commandText}";
+                }
+
+                var connection = _unitOfWork.GetDbContext().Connection;
+
+                if (connection.State != ConnectionState.Open)
+                {
+                    if (connection is DbConnection dbConn)
+                        await dbConn.OpenAsync();
+                    else
+                        connection.Open(); // fallback
+                }
+
+                var cmd = connection.CreateCommand();
+
+                if (cmd is not DbCommand dbCmd)
+                    throw new InvalidOperationException("Command must implement DbCommand for async.");
+
+                cmd.CommandText = commandText;
+                cmd.CommandType = commandType;
+
+                trans = _unitOfWork.GetTransaction() ?? connection.BeginTransaction();
+                cmd.Transaction = trans;
+
+                if (parameters != null)
+                {
+                    AddParameters(cmd, parameters);
+                }
+
+                dr = await dbCmd.ExecuteReaderAsync();
+
+                T result = default;
+
+                if (await dr.ReadAsync())
+                {
+                    result = CBO.FillObject<T>(dr);
+                }
+
+                await dr.CloseAsync();
+
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans.Commit();
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (trans != null && _unitOfWork.GetTransaction() == null)
+                {
+                    trans.Rollback();
+                }
+
+                throw new Exception(ErrorMessage(ex, commandText, parameters), ex);
+            }
+            finally
+            {
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans?.Dispose();
+                }
+            }
+        }
+
+       
+
+        /// <summary>Executes the reader lấy nhiều dòng.</summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="commandText">The command text.</param>
         /// <param name="commandType">Type of the command.</param>
@@ -286,6 +591,94 @@ namespace App.DataAccess
             }
         }
 
+        /// <summary>Executes the reader lấy nhiều dòng với async- await </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="commandText">The command text.</param>
+        /// <param name="commandType">Type of the command.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <exception cref="System.Exception"></exception>
+        /// Author: thuanbv
+        /// Created: 23/04/2025
+        /// Modified: date - user - description
+        public async Task<List<T>> ExecuteReaderAsync<T>(string commandText, CommandType commandType = CommandType.Text, object parameters = null)
+        {
+            DbDataReader dr = null;
+            IDbTransaction trans = null;
+
+            try
+            {
+                if (commandType == CommandType.StoredProcedure && !string.IsNullOrEmpty(Schema))
+                {
+                    commandText = $"{Schema}.{commandText}";
+                }
+
+                var connection = _unitOfWork.GetDbContext().Connection;
+
+                if (connection.State != ConnectionState.Open)
+                {
+                    if (connection is DbConnection dbConn)
+                        await dbConn.OpenAsync();
+                    else
+                        connection.Open(); // fallback
+                }
+
+                var cmd = connection.CreateCommand();
+
+                if (cmd is not DbCommand dbCmd)
+                    throw new InvalidOperationException("Command must implement DbCommand for async.");
+
+                cmd.CommandText = commandText;
+                cmd.CommandType = commandType;
+                trans = _unitOfWork.GetTransaction() ?? connection.BeginTransaction();
+                cmd.Transaction = trans;
+
+                if (parameters != null)
+                {
+                    AddParameters(cmd, parameters);
+                }
+
+                using (dr = await dbCmd.ExecuteReaderAsync())
+                {
+                    var result = CBO.FillList<T>(dr);
+
+                    if (_unitOfWork.GetTransaction() == null)
+                    {
+                        trans.Commit();
+                    }
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (trans != null && _unitOfWork.GetTransaction() == null)
+                {
+                    trans.Rollback();
+                }
+
+                throw new Exception(ErrorMessage(ex, commandText, parameters), ex);
+            }
+            finally
+            {
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans?.Dispose();
+                }
+            }
+        }
+
+
+
+        /// <summary>Executes the reader lấy nhiều dòng . có thêm out TotalCount phục vụ cho phân trang .</summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="commandText">The command text.</param>
+        /// <param name="commandType">Type of the command.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <exception cref="System.Exception"></exception>
+        /// Author: thuanbv
+        /// Created: 23/04/2025
+        /// Modified: date - user - description
+        /// 
         public void ExecuteReader<T>(out List<T> ret, out int TotalCount, string commandText, CommandType commandType = CommandType.Text, object parameters = null)
         {
             IDataReader dr = null;
@@ -324,7 +717,7 @@ namespace App.DataAccess
 
                 // Thực thi
                 dr = cmd.ExecuteReader();
-             
+
 
                 // Map kết quả
                 ret = CBO.FillList<T>(dr, "TotalCount", out TotalCount);
@@ -336,7 +729,7 @@ namespace App.DataAccess
                     trans.Commit();
                 }
 
-               
+
             }
             catch (Exception ex)
             {
@@ -357,6 +750,88 @@ namespace App.DataAccess
                 }
             }
         }
+
+
+        /// <summary>Executes the reader lấy nhiều dòng . có thêm out TotalCount phục vụ cho phân trang async- await .</summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="commandText">The command text.</param>
+        /// <param name="commandType">Type of the command.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <exception cref="System.Exception"></exception>
+        /// Author: thuanbv
+        /// Created: 23/04/2025
+        /// Modified: date - user - description
+        ///
+        public async Task<(List<T> Result, int TotalCount)> ExecuteReaderWithTotalAsync<T>(string commandText, CommandType commandType = CommandType.Text, object parameters = null)
+        {
+            DbDataReader dr = null;
+            IDbTransaction trans = null;
+
+            try
+            {
+                if (commandType == CommandType.StoredProcedure && !string.IsNullOrEmpty(Schema))
+                {
+                    commandText = $"{Schema}.{commandText}";
+                }
+
+                var connection = _unitOfWork.GetDbContext().Connection;
+
+                if (connection.State != ConnectionState.Open)
+                {
+                    if (connection is DbConnection dbConn)
+                        await dbConn.OpenAsync();
+                    else
+                        connection.Open();
+                }
+
+                var cmd = connection.CreateCommand();
+
+                if (cmd is not DbCommand dbCmd)
+                    throw new InvalidOperationException("Command must implement DbCommand for async.");
+
+                cmd.CommandText = commandText;
+                cmd.CommandType = commandType;
+                trans = _unitOfWork.GetTransaction() ?? connection.BeginTransaction();
+                cmd.Transaction = trans;
+
+                if (parameters != null)
+                {
+                    AddParameters(cmd, parameters);
+                }
+
+                dr = await dbCmd.ExecuteReaderAsync();
+
+                var result = CBO.FillList<T>(dr, "TotalCount", out int totalCount); // Sync mapping
+                await dr.CloseAsync();
+
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans.Commit();
+                }
+
+                return (result, totalCount);
+            }
+            catch (Exception ex)
+            {
+                if (trans != null && _unitOfWork.GetTransaction() == null)
+                {
+                    trans.Rollback();
+                }
+
+                throw new Exception(ErrorMessage(ex, commandText, parameters), ex);
+            }
+            finally
+            {
+                if (_unitOfWork.GetTransaction() == null)
+                {
+                    trans?.Dispose();
+                }
+            }
+        }
+
+
+        #endregion
+
 
         /// <summary>Executes the command.</summary>
         /// <param name="dr">The dr.</param>
@@ -442,8 +917,6 @@ namespace App.DataAccess
                 throw new Exception("Lỗi thực thi command", ex);
             }
         }
-
-
         /// <summary>Gets the table data.</summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="ret">The ret.</param>
@@ -696,7 +1169,7 @@ namespace App.DataAccess
                 {
                     var param = cmd.CreateParameter();
                     param.ParameterName = "@" + prop.Name;
-                    param.Value = Null.GetDBNull(prop.GetValue(parameters)) ;
+                    param.Value = Null.GetDBNull(prop.GetValue(parameters));
                     cmd.Parameters.Add(param);
                 }
             }

@@ -27,6 +27,8 @@ using System.Xml.Serialization;
 using System.Data;
 using System.Collections;
 using System.Dynamic;
+using System.Data.Common;
+using System.Linq;
 
 namespace App.Common.Helper
 {
@@ -437,6 +439,33 @@ namespace App.Common.Helper
                 dr.Close();
 
             return objFillCollection;
+        }
+
+        public static async Task<List<T>> FillListAsync<T>(DbDataReader reader) where T : new()
+        {
+            var list = new List<T>();
+            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            var columnNames = Enumerable.Range(0, reader.FieldCount)
+                                        .Select(i => reader.GetName(i).ToLower())
+                                        .ToList();
+
+            while (await reader.ReadAsync())
+            {
+                var obj = new T();
+                foreach (var prop in properties)
+                {
+                    var columnName = prop.Name.ToLower();
+                    if (columnNames.Contains(columnName) && !await reader.IsDBNullAsync(reader.GetOrdinal(prop.Name)))
+                    {
+                        var value = await reader.GetFieldValueAsync<object>(reader.GetOrdinal(prop.Name));
+                        prop.SetValue(obj, Convert.ChangeType(value, prop.PropertyType));
+                    }
+                }
+                list.Add(obj);
+            }
+
+            return list;
         }
 
         /// <summary>Fills the list.</summary>

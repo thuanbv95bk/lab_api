@@ -21,7 +21,7 @@ namespace App.Lab.Repository.Interface
         /// Author: thuanbv
         /// Created: 24/04/2025
         /// Modified: date - user - description
-        List<HrmEmployeesCbx> GetListCbx(int FkCompanyID);
+        Task<List<HrmEmployeesCbx>>  GetListCbxAsync(int FkCompanyID);
 
 
         /// <summary>Interface Lấy danh sách lái xe theo điều kiện và theo Paging </summary>
@@ -29,14 +29,14 @@ namespace App.Lab.Repository.Interface
         /// Author: thuanbv
         /// Created: 25/04/2025
         /// Modified: date - user - description
-        PagingResult<HrmEmployees> GetPagingToEdit(HrmEmployeesFilter filter);
+        Task<PagingResult<HrmEmployees>> GetPagingToEditAsync(HrmEmployeesFilter filter);
 
         /// <summary>Interface Lấy danh sách lái xe theo điều kiện => xuất Excel </summary>
         /// <param name="filter">HrmEmployeesFilter: bộ lọc để lấy dữ liệu</param>
         /// Author: thuanbv
         /// Created: 28/04/2025
         /// Modified: date - user - description
-        List<HrmEmployees> GetDataToExcel(HrmEmployeesFilterExcel filter);
+        Task<List<HrmEmployees>> GetDataToExcelAsync(HrmEmployeesFilterExcel filter);
 
 
         /// <summary>Updates Thông tin của 1 lái xe.</summary>
@@ -44,14 +44,14 @@ namespace App.Lab.Repository.Interface
         /// Author: thuanbv
         /// Created: 28/04/2025
         /// Modified: date - user - description
-        Task Update(HrmEmployees obj);
+        Task UpdateAsync(HrmEmployees obj);
 
         /// <summary>Xóa mềm 1 lái xe. isDelete =0 </summary>
         /// <param name="employeeId">id lái xe</param>
         /// Author: thuanbv
         /// Created: 28/04/2025
         /// Modified: date - user - description
-        Task DeleteSoft(int employeeId);
+        Task DeleteSoftAsync(int employeeId);
 
 
         /// <summary>Kiểm tra sự tồn tại của danh sách PkEmployeeId trong cơ sở dữ liệu </summary>
@@ -60,12 +60,12 @@ namespace App.Lab.Repository.Interface
         /// Created: 07/05/2025
         /// Modified: date - user - description
 
-        IEnumerable<int> GetExistingEmployeeIds(IEnumerable<int> employeeIds);
+        Task<IEnumerable<int>> GetExistingEmployeeIdsAsync(IEnumerable<int> employeeIds);
 
         /// <summary>Kiểm tra sự tồn tại của danh sách theo tên và giấy phép lái xe trong cơ sở dữ liệu </summary>
         /// Author: thuanbv
         /// Created: 08/05/2025
         /// Modified: date - user - description
-        List<HrmEmployees> GetCheckExistingEmployeeByNameAndDriverLicense(string jsonIds, string jsonNames, string jsonLicenses);
+        Task<List<HrmEmployees>> GetCheckExistingEmployeeByNameAndDriverLicenseAsync(string jsonIds, string jsonNames, string jsonLicenses);
     }
 }

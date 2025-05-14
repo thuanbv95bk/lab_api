@@ -27,6 +27,6 @@ namespace App.Lab.App.Repository.Interface
         /// Author: thuanbv
         /// Created: 4/22/2025
         /// Modified: date - user - description
-        UserVehicleGroupView GetViewById(int objId);
+        Task<UserVehicleGroupView> GetViewByIdAsync(int objId);
     }
 }

@@ -19,6 +19,6 @@ namespace App.Lab.Repository.Interface
         /// Author: thuanbv
         /// Created: 24/04/2025
         /// Modified: date - user - descriptions
-        public List<BcaLicenseTypes> GetListActive();
+        public Task<List<BcaLicenseTypes>> GetListActiveAsync();
     }
 }

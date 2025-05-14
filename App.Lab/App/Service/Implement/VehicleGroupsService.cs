@@ -20,6 +20,7 @@ namespace App.Lab.App.Service.Implement
     {
         private readonly IUnitOfWork _uow;
 
+
         private readonly IAdminUserVehicleGroupRepository _IAdminUserVehicleGroupRepository;
 
         public VehicleGroupsService(
@@ -43,6 +44,7 @@ namespace App.Lab.App.Service.Implement
         /// Author: thuanbv
         /// Created: 4/22/2025
         /// Modified: date - user - description
+
         public ServiceStatus GetListUnassignGroups(VehicleGroupsFilter filter, bool includeParentIfAssigned = true)
         {
             try
@@ -78,13 +80,13 @@ namespace App.Lab.App.Service.Implement
                 var flatList = resultDict.Values;
                 var tree = BuildHierarchy(flatList.ToList());
 
-                return ServiceStatus.Success(tree); 
+                return ServiceStatus.Success(tree);
             }
             catch (Exception ex)
             {
                 return ServiceStatus.Failure("Có lỗi xảy ra, không thể lấy nhóm phương tiện");
             }
-            
+
         }
 
 

@@ -26,11 +26,11 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 24/04/2025
         /// Modified: date - user - description
-        public List<HrmEmployeesCbx> GetListCbx(int FkCompanyID)
+        public async Task<List<HrmEmployeesCbx>> GetListCbxAsync(int FkCompanyID)
         {
             var listItem = new List<HrmEmployeesCbx>() { };
 
-            listItem = ExecuteReader<HrmEmployeesCbx>
+            listItem = await ExecuteReaderAsync<HrmEmployeesCbx>
             (
                 "SELECT PK_EmployeeID as PkEmployeeID , LTRIM(DisplayName) as DisplayName, DriverLicense " +
                 "FROM [HRM.Employees] " +
@@ -99,16 +99,13 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 25/04/2025
         /// Modified: date - user - description
-        public PagingResult<HrmEmployees> GetPagingToEdit(HrmEmployeesFilter filter)
+        public async Task<PagingResult<HrmEmployees>> GetPagingToEditAsync(HrmEmployeesFilter filter)
         {
-
-            this.ExecuteReader
+            var (listItem, totalCount) = await this.ExecuteReaderWithTotalAsync<HrmEmployees>
             (
-                out List<HrmEmployees> listItem
-                , out int TotalCount
-                , BuildQueryGetListHrmEmployees(true)
-                , CommandType.Text
-                , new
+                BuildQueryGetListHrmEmployees(true),
+                CommandType.Text,
+                new
                 {
                     FK_CompanyID = filter.FkCompanyId,
                     Name = filter.DisplayName?.Trim(),
@@ -120,25 +117,26 @@ namespace App.Lab.Repository.Implement
                     pageSize = filter.PageSize,
                     pageIndex = filter.PageIndex
                 }
-
             );
 
             var ret = new PagingResult<HrmEmployees>()
             {
-                TotalCount = TotalCount,
+                TotalCount = totalCount,
                 Data = listItem,
             };
+
             return ret;
         }
+
         /// <summary> Lấy danh sách lái xe theo điều kiện => xuất Excel </summary>
         /// <param name="filter">HrmEmployeesFilter: bộ lọc để lấy dữ liệu</param>
         /// Author: thuanbv
         /// Created: 25/04/2025
         /// Modified: date - user - description
-        public List<HrmEmployees> GetDataToExcel(HrmEmployeesFilterExcel filter)
+        public async Task<List<HrmEmployees>> GetDataToExcelAsync(HrmEmployeesFilterExcel filter)
         {
 
-            var listItem = this.ExecuteReader<HrmEmployees>
+            var listItem = await this.ExecuteReaderAsync<HrmEmployees>
             (
                 BuildQueryGetListHrmEmployees(false)
                 , CommandType.Text
@@ -156,13 +154,13 @@ namespace App.Lab.Repository.Implement
 
             return listItem;
         }
-
+        
         /// <summary>Updates Thông tin của 1 lái xe.</summary>
         /// <param name="obj">HrmEmployees thông tin của 1 lái xe</param>
         /// Author: thuanbv
         /// Created: 28/04/2025
         /// Modified: date - user - description
-        public Task Update(HrmEmployees item)
+        public async Task UpdateAsync(HrmEmployees item)
         {
             var user = "E66E300E-B644-41B0-8124-CE9954434C6F";
             var now = DateTime.Now;
@@ -180,7 +178,7 @@ namespace App.Lab.Repository.Implement
                     ",UpdatedDate = @UpdatedDate" +
                     ",UpdatedByUser = @UpdatedByUser " +
                 "WHERE PK_EmployeeID = @PK_EmployeeID;";
-            return Task.Run(() => this.ExecuteScalar<int>
+             await this.ExecuteScalarAsync<int>
             (
                 sql
                , CommandType.Text
@@ -197,10 +195,9 @@ namespace App.Lab.Repository.Implement
 
                     UpdateByUser = user,
                     UpdatedDate = now,
-                    UpdatedByUser = user,
                     PK_EmployeeID = item.PkEmployeeId
                 }
-            ));
+            );
         }
 
 
@@ -209,7 +206,7 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 28/04/2025
         /// Modified: date - user - description
-        public Task DeleteSoft(int employeeId)
+        public async Task DeleteSoftAsync(int employeeId)
         {
             var user = "E66E300E-B644-41B0-8124-CE9954434C6F";
             var now = DateTime.Now;
@@ -220,7 +217,7 @@ namespace App.Lab.Repository.Implement
                     ",UpdatedDate = @UpdatedDate" +
                     ",UpdatedByUser = @UpdatedByUser " +
                 "WHERE PK_EmployeeID = @PK_EmployeeID;";
-            return Task.Run(() => this.ExecuteScalar<int>
+           await  this.ExecuteScalarAsync<int>
             (
                 sql
                , CommandType.Text
@@ -231,8 +228,7 @@ namespace App.Lab.Repository.Implement
                     UpdatedDate = now,
                     UpdatedByUser = user
                 }
-            ));
-
+            );
         }
 
         /// <summary>Kiểm tra sự tồn tại của danh sách PkEmployeeId trong cơ sở dữ liệu </summary>
@@ -240,7 +236,7 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 07/05/2025
         /// Modified: date - user - description
-        public IEnumerable<int> GetExistingEmployeeIds(IEnumerable<int> employeeIds)
+        public async Task<IEnumerable<int>> GetExistingEmployeeIdsAsync(IEnumerable<int> employeeIds)
         {
             if (employeeIds == null || !employeeIds.Any())
             {
@@ -260,12 +256,10 @@ namespace App.Lab.Repository.Implement
                 "AND ISNULL(IsLocked, 0) = 0;";
         
             // Thực thi truy vấn và trả về danh sách các ID tồn tại
-            var existingIds = ExecuteReader<int>(query, CommandType.Text,
+            var existingIds = await ExecuteReaderAsync<int>(query, CommandType.Text,
             new
             {
                 idsString = idsString,
-                
-
             });
 
             return existingIds;
@@ -275,7 +269,7 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 08/05/2025
         /// Modified: date - user - description
-        public List<HrmEmployees> GetCheckExistingEmployeeByNameAndDriverLicense(string jsonIds, string jsonNames, string jsonLicenses)
+        public async Task<List<HrmEmployees>> GetCheckExistingEmployeeByNameAndDriverLicenseAsync(string jsonIds, string jsonNames, string jsonLicenses)
         {
             if (string.IsNullOrEmpty(jsonNames) && string.IsNullOrEmpty(jsonLicenses))
             {
@@ -286,18 +280,19 @@ namespace App.Lab.Repository.Implement
             var query =
                 "SELECT E.DisplayName, E.DriverLicense, E.PK_EmployeeID as PkEmployeeID " +
                 "FROM dbo.[HRM.Employees] E " +
-                "JOIN (" +
-                "SELECT  N.[value] AS Name, L.[value] AS DriverLicense, CAST(i.[value] AS INT) AS ExcludedId " +
-                "FROM OPENJSON(@jsonNames) AS N " +
-                "JOIN OPENJSON(@jsonLicenses) AS L ON N.[key] = L.[key] " +
-                "JOIN OPENJSON(@jsonIds) AS I ON N.[key] = I.[key] ) " +
-                "AS Pairs ON E.Name = Pairs.Name " +
+                "JOIN " +
+                "(" +
+                    "SELECT  N.[value] AS Name, L.[value] AS DriverLicense, CAST(i.[value] AS INT) AS ExcludedId " +
+                    "FROM OPENJSON(@jsonNames) AS N " +
+                    "JOIN OPENJSON(@jsonLicenses) AS L ON N.[key] = L.[key] " +
+                    "JOIN OPENJSON(@jsonIds) AS I ON N.[key] = I.[key] " +
+                ") AS Pairs ON E.Name = Pairs.Name " +
                 "AND E.DriverLicense = Pairs.DriverLicense " +
                 "AND E.PK_EmployeeID != Pairs.ExcludedId; ";
 
 
             // Thực thi truy vấn và trả về danh sách các ID tồn tại
-            var existingIds = ExecuteReader<HrmEmployees>(query, CommandType.Text,
+            var existingIds = await ExecuteReaderAsync<HrmEmployees>(query, CommandType.Text,
             new
             {
                 jsonIds = jsonIds,

@@ -19,14 +19,14 @@ namespace App.Lab.Repository.Interface
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
-        Task Create(AdminUserVehicleGroup obj);
+        Task CreateAsync(AdminUserVehicleGroup obj);
         /// <summary> Xóa mềm 1 nhóm phương tiện theo user </summary>
         /// <param name="item">nhóm phương tiện theo user</param>
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
         /// 
-        Task DeleteSoft(AdminUserVehicleGroup item);
+        Task DeleteSoftAsync(AdminUserVehicleGroup item);
 
         /// <summary> Cập nhật 1 nhóm phương tiện theo user </summary>
         /// <param name="item">nhóm phương tiện theo user</param>
@@ -34,7 +34,7 @@ namespace App.Lab.Repository.Interface
         /// Created: 22/04/2025
         /// Modified: date - user - description
         /// 
-        Task Update(AdminUserVehicleGroup item);
+        Task UpdateAsync(AdminUserVehicleGroup item);
 
         /// <summary> Lấy danh sách nhóm phương tiện theo user </summary>
         /// <param name="filter">Bộ lọc nhóm phương tiện theo user</param>
@@ -50,7 +50,7 @@ namespace App.Lab.Repository.Interface
         /// Created: 22/04/2025
         /// Modified: date - user - description
         ///
-        List<VehicleGroups> GetListView(AdminUserVehicleGroupFilter filter);
+        Task<List<VehicleGroups>> GetListViewAsync(AdminUserVehicleGroupFilter filter);
 
 
     }

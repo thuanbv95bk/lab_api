@@ -21,7 +21,7 @@ namespace App.Lab.Service.Interface
         /// Author: thuanbv
         /// Created: 24/04/2025
         /// Modified: date - user - description
-        List<HrmEmployeesCbx> GetListCbx(int FkCompanyID);
+        Task<List<HrmEmployeesCbx>> GetListCbxAsync(int FkCompanyID);
 
 
 
@@ -30,7 +30,7 @@ namespace App.Lab.Service.Interface
         /// Author: thuanbv
         /// Created: 25/04/2025
         /// Modified: date - user - description
-        PagingResult<HrmEmployees> GetPagingToEdit(HrmEmployeesFilter filter);
+        Task<PagingResult<HrmEmployees>> GetPagingToEditAsync(HrmEmployeesFilter filter);
 
 
         /// <summary>Interface cập nhât danh sách thông tin của lái xe </summary>
@@ -53,6 +53,6 @@ namespace App.Lab.Service.Interface
         /// Author: thuanbv
         /// Created: 28/04/2025
         /// Modified: date - user - description
-        MemoryStream ExportExcel(HrmEmployeesFilterExcel filter);
+        Task<MemoryStream> ExportExcelAsync(HrmEmployeesFilterExcel filter);
     }
 }

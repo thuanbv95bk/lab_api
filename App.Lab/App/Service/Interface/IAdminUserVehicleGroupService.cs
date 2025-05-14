@@ -23,7 +23,7 @@ namespace App.Lab.App.Service.Interface
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
-        ServiceStatus GetListAssignGroups(AdminUserVehicleGroupFilter filter);
+        Task<ServiceStatus> GetListAssignGroupsAsync(AdminUserVehicleGroupFilter filter);
 
         /// <summary>Thêm, xóa mềm, cập nhật xóa mềm- active của danh sách nhóm phương tiện của user</summary>
         /// <param name="items"> Model thêm mới 1 nhóm phương tiện</param>

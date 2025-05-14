@@ -26,11 +26,9 @@ namespace App.Lab.Repository.Implement
         /// Author: thuanbv
         /// Created: 24/04/2025
         /// Modified: date - user - description
-        public List<BcaLicenseTypes> GetListActive()
+        public async Task<List<BcaLicenseTypes>> GetListActiveAsync()
         {
-            var listItem = new List<BcaLicenseTypes>() { };
-
-            listItem = ExecuteReader<BcaLicenseTypes>
+           var listItem = await ExecuteReaderAsync<BcaLicenseTypes>
             (
                 "SELECT PK_LicenseTypeID AS PkLicenseTypeId , Code, Name, IsActived, IsDeteted " +
                 "FROM  [BCA.LicenseTypes] " +

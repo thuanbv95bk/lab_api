@@ -30,13 +30,13 @@ namespace App.Admin.Controllers
         /// Modified: date - user - description
         [HttpPost]
         [Route("get-list-assign-groups")]
-        public  IActionResult GetListAssignGroups(AdminUserVehicleGroupFilter filter)
+        public async Task<IActionResult> GetListAssignGroups([FromBody] AdminUserVehicleGroupFilter filter)
         {
             if (filter.FK_UserID.Length == 0)
             {
                 return Failure("Phải chọn người dùng");
             }
-            var ret =  _service.GetListAssignGroups(filter);
+            var ret = await _service.GetListAssignGroupsAsync(filter);
 
             return ret.IsSuccess ? Success(ret.Data) : Failure(ret.ErroMessage);
         }
@@ -49,7 +49,7 @@ namespace App.Admin.Controllers
         /// Modified: date - user - description
         [HttpPost]
         [Route("add-or-edit-list")]
-        public  async Task<IActionResult> AddOrEditList(VehicleGroupModel item)
+        public async Task<IActionResult> AddOrEditList(VehicleGroupModel item)
         {
             try
             {
@@ -65,7 +65,7 @@ namespace App.Admin.Controllers
             {
                 return Failure("Có lỗi xảy ra với hệ thống");
             }
-           
+
         }
 
     }

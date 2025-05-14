@@ -18,6 +18,6 @@ namespace App.Lab.Repository.Interface
         /// Author: thuanbv
         /// Created: 22/04/2025
         /// Modified: date - user - description
-        List<Users> GetList(Users filter);
+        Task<List<Users>> GetListAsync(Users filter);
     }
 }

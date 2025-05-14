@@ -32,7 +32,7 @@ namespace App.Admin.Controllers
         /// Modified: date - user - description
         [HttpPost]
         [Route("get-list-cbx")]
-        public IActionResult GetListCbx(int FkCompanyID)
+        public async Task<IActionResult> GetListCbx(int FkCompanyID)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace App.Admin.Controllers
                 {
                     return Failure("Phải nhập tiêu chí tìm kiếm");
                 }
-                var ret = _service.GetListCbx(FkCompanyID);
+                var ret = _service.GetListCbxAsync(FkCompanyID);
                 return Success(ret);
             }
             catch (Exception ex)
@@ -58,7 +58,7 @@ namespace App.Admin.Controllers
         /// Modified: date - user - description
         [HttpPost]
         [Route("get-paging-to-edit")]
-        public IActionResult GetPagingToEdit(HrmEmployeesFilter filter)
+        public async Task<IActionResult> GetPagingToEdit( [FromBody] HrmEmployeesFilter filter)
         {
             try
             {
@@ -66,14 +66,17 @@ namespace App.Admin.Controllers
                 {
                     return Failure("Phải nhập tiêu chí tìm kiếm");
                 }
-                var ret = _service.GetPagingToEdit(filter);
+
+                // Gọi phương thức bất đồng bộ từ service
+                var ret = await _service.GetPagingToEditAsync(filter); 
+
                 return Success(ret);
             }
             catch (Exception ex)
             {
+                // Lỗi chung, bạn có thể log thêm ex để debug
                 return Failure("Có lỗi xảy ra với hệ thống");
             }
-            
         }
 
         /// <summary>Chỉnh sửa danh sách lái xe, check Validator đầu vào hợp lệ</summary>
@@ -83,7 +86,7 @@ namespace App.Admin.Controllers
         /// Modified: date - user - description
         [HttpPost]
         [Route("add-or-edit-list")]
-        public async Task<IActionResult> AddOrEditList(List<HrmEmployees> items, [FromServices] IValidator<List<HrmEmployees>> validator)
+        public async Task<IActionResult> AddOrEditList([FromBody]  List<HrmEmployees> items, [FromServices] IValidator<List<HrmEmployees>> validator)
         {
             try
             {
@@ -144,7 +147,7 @@ namespace App.Admin.Controllers
 
         [HttpPost]
         [Route("export-excel")]
-        public  IActionResult ExportExcel(HrmEmployeesFilterExcel filter)
+        public async Task<IActionResult> ExportExcel([FromBody]  HrmEmployeesFilterExcel filter)
         {
             try
             {
@@ -156,7 +159,7 @@ namespace App.Admin.Controllers
                 {
                     return Failure("Chưa có điều kiện tìm kiếm theo công ty, vui lòng thử lại");
                 }
-                var stream = _service.ExportExcel(filter);
+                var stream = await _service.ExportExcelAsync(filter);
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             }
             catch (Exception ex)
